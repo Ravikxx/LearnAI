@@ -90,7 +90,7 @@
       <div class="lesson-list">${rows}</div>`;
   }
 
-  // ---------- lesson player ----------
+  // ---------- lesson player (one step per page, animated) ----------
   function renderLesson(cid, lid) {
     const c = COURSES.find(x => x.id === cid);
     const l = c && c.lessons.find(x => x.id === lid);
@@ -100,17 +100,37 @@
       <div class="player-top" style="--accent:${c.accent}">
         <a class="exit-btn" href="#course/${c.id}" title="Exit lesson">✕</a>
         <div class="pbar" style="flex:1"><div id="lesson-pbar" style="width:0%"></div></div>
+        <span class="step-count" id="step-count"></span>
       </div>
-      <div id="steps"></div>`;
-    const stepsEl = document.getElementById('steps');
+      <div class="stage" id="stage"></div>
+      <div class="step-nav" id="step-nav" style="--accent:${c.accent}">
+        <button class="btn ghost" id="nav-back">← Back</button>
+        <button class="btn" id="nav-next" style="background:${c.accent}">Next →</button>
+      </div>`;
+    const stage = document.getElementById('stage');
     const pbar = document.getElementById('lesson-pbar');
-    let idx = 0;
+    const countEl = document.getElementById('step-count');
+    const navEl = document.getElementById('step-nav');
+    const backBtn = document.getElementById('nav-back');
+    const nextBtn = document.getElementById('nav-next');
 
-    function updateBar() {
-      pbar.style.width = Math.round(idx / l.steps.length * 100) + '%';
+    let idx = 0;
+    let animating = false;
+    const answers = {}; // stepIndex -> chosen option index
+
+    function quizLocked(i) {
+      return l.steps[i].t === 'quiz' && answers[i] === undefined;
     }
 
-    function showStep(i, scroll) {
+    function updateChrome() {
+      pbar.style.width = Math.round((idx + 1) / l.steps.length * 100) + '%';
+      countEl.textContent = `${idx + 1} / ${l.steps.length}`;
+      backBtn.disabled = idx === 0;
+      nextBtn.disabled = quizLocked(idx);
+      nextBtn.innerHTML = idx === l.steps.length - 1 ? 'Finish 🎉' : 'Next →';
+    }
+
+    function buildStep(i) {
       const step = l.steps[i];
       const wrap = document.createElement('div');
       wrap.className = 'step';
@@ -121,70 +141,75 @@
 
       if (step.t === 'text') {
         card.innerHTML = (step.title ? `<h2>${step.title}</h2>` : '') + step.md;
-        stepsEl.append(wrap);
-        addContinue(wrap);
       } else if (step.t === 'widget') {
         card.innerHTML = (step.title ? `<h2>${step.title}</h2>` : '') + (step.md || '');
         const box = document.createElement('div');
         box.className = 'widget';
         card.append(box);
-        stepsEl.append(wrap);
         try { WIDGETS[step.name](box); }
         catch (e) { box.textContent = 'Widget failed to load: ' + e.message; }
-        addContinue(wrap);
       } else if (step.t === 'quiz') {
         card.innerHTML = `<div class="quiz-q">${step.q}</div>`;
         const opts = document.createElement('div');
         opts.className = 'quiz-opts';
+        card.append(opts);
+
+        function paintAnswered(chosen, fresh) {
+          opts.querySelectorAll('button').forEach((b, bi) => {
+            b.disabled = true;
+            if (bi === step.a) b.classList.add('correct');
+            else if (bi === chosen) b.classList.add('wrong');
+          });
+          const correct = chosen === step.a;
+          const why = document.createElement('div');
+          why.className = 'quiz-why ' + (correct ? 'ok' : 'no');
+          why.innerHTML = `<b>${correct ? (fresh ? '✅ Correct! +5 XP' : '✅ Correct!') : '❌ Not quite.'}</b>${step.why}`;
+          card.append(why);
+        }
+
         step.opts.forEach((opt, oi) => {
           const b = document.createElement('button');
           b.className = 'quiz-opt';
           b.innerHTML = opt;
-          b.onclick = () => answer(oi, b);
+          b.onclick = () => {
+            if (answers[i] !== undefined) return;
+            answers[i] = oi;
+            if (oi === step.a) addXP(5);
+            paintAnswered(oi, true);
+            updateChrome();
+          };
           opts.append(b);
         });
-        card.append(opts);
-        stepsEl.append(wrap);
-
-        function answer(oi, btn) {
-          const correct = oi === step.a;
-          opts.querySelectorAll('button').forEach((b, bi) => {
-            b.disabled = true;
-            if (bi === step.a) b.classList.add('correct');
-          });
-          if (!correct) btn.classList.add('wrong');
-          else addXP(5);
-          const why = document.createElement('div');
-          why.className = 'quiz-why ' + (correct ? 'ok' : 'no');
-          why.innerHTML = `<b>${correct ? '✅ Correct! +5 XP' : '❌ Not quite.'}</b>${step.why}`;
-          card.append(why);
-          addContinue(wrap);
-          why.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
+        if (answers[i] !== undefined) paintAnswered(answers[i], false);
       }
-      if (scroll) wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return wrap;
     }
 
-    function addContinue(afterEl) {
-      const row = document.createElement('div');
-      row.className = 'continue-row';
-      const btn = document.createElement('button');
-      btn.className = 'btn';
-      btn.style.background = c.accent;
-      const last = idx >= l.steps.length - 1;
-      btn.textContent = last ? 'Finish lesson 🎉' : 'Continue';
-      btn.onclick = () => {
-        row.remove();
-        idx++;
-        updateBar();
-        if (idx < l.steps.length) showStep(idx, true);
-        else finish();
+    function show(i, dir) {
+      if (animating) return;
+      animating = true;
+      const old = stage.firstElementChild;
+      const swap = () => {
+        idx = i;
+        stage.innerHTML = '';
+        const el = buildStep(i);
+        el.classList.add(dir >= 0 ? 'enter-right' : 'enter-left');
+        stage.append(el);
+        updateChrome();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => { animating = false; }, 250);
       };
-      row.append(btn);
-      afterEl.after(row);
+      if (old && dir !== 0) {
+        old.classList.add(dir > 0 ? 'leave-left' : 'leave-right');
+        setTimeout(swap, 200);
+      } else {
+        swap();
+      }
     }
 
     function finish() {
+      if (animating) return;
+      animating = true;
       const key = c.id + '/' + l.id;
       const first = !S.done[key];
       if (first) {
@@ -194,23 +219,44 @@
       }
       const li = c.lessons.indexOf(l);
       const next = c.lessons[li + 1];
-      const div = document.createElement('div');
-      div.className = 'complete-card';
-      div.innerHTML = `
-        <div class="big">${first ? '🏆' : '⭐'}</div>
-        <h2>Lesson complete!</h2>
-        <p>${first ? '+20 XP earned.' : 'Nice refresher.'} ${next ? 'Keep the momentum going.' : 'That was the last lesson in this course!'}</p>
-        <div class="complete-actions">
-          ${next ? `<a class="btn" style="background:${c.accent}" href="#lesson/${c.id}/${next.id}">Next: ${next.title} →</a>` : ''}
-          <a class="btn ghost" href="#course/${c.id}">Back to course</a>
-        </div>`;
-      stepsEl.append(div);
-      div.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const old = stage.firstElementChild;
+      if (old) old.classList.add('leave-left');
+      navEl.style.display = 'none';
       pbar.style.width = '100%';
+      countEl.textContent = '✓';
+      setTimeout(() => {
+        stage.innerHTML = '';
+        const div = document.createElement('div');
+        div.className = 'complete-card enter-right';
+        div.innerHTML = `
+          <div class="big">${first ? '🏆' : '⭐'}</div>
+          <h2>Lesson complete!</h2>
+          <p>${first ? '+20 XP earned.' : 'Nice refresher.'} ${next ? 'Keep the momentum going.' : 'That was the last lesson in this course!'}</p>
+          <div class="complete-actions">
+            ${next ? `<a class="btn" style="background:${c.accent}" href="#lesson/${c.id}/${next.id}">Next: ${next.title} →</a>` : ''}
+            <a class="btn ghost" href="#course/${c.id}">Back to course</a>
+          </div>`;
+        stage.append(div);
+        animating = false;
+      }, 200);
     }
 
-    updateBar();
-    showStep(0, false);
+    backBtn.onclick = () => { if (idx > 0) show(idx - 1, -1); };
+    nextBtn.onclick = () => {
+      if (quizLocked(idx)) return;
+      if (idx < l.steps.length - 1) show(idx + 1, 1);
+      else finish();
+    };
+
+    // arrow-key navigation (replaced on every lesson render)
+    if (window.__lessonKeys) window.removeEventListener('keydown', window.__lessonKeys);
+    window.__lessonKeys = (e) => {
+      if (e.key === 'ArrowRight' && !nextBtn.disabled && navEl.style.display !== 'none') nextBtn.onclick();
+      else if (e.key === 'ArrowLeft' && idx > 0) show(idx - 1, -1);
+    };
+    window.addEventListener('keydown', window.__lessonKeys);
+
+    show(0, 0);
   }
 
   // ---------- router ----------
@@ -218,6 +264,10 @@
     const h = location.hash.slice(1);
     window.scrollTo(0, 0);
     const parts = h.split('/');
+    if (parts[0] !== 'lesson' && window.__lessonKeys) {
+      window.removeEventListener('keydown', window.__lessonKeys);
+      window.__lessonKeys = null;
+    }
     if (parts[0] === 'course' && parts[1]) renderCourse(parts[1]);
     else if (parts[0] === 'lesson' && parts[2]) renderLesson(parts[1], parts[2]);
     else renderHome();

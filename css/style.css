@@ -147,8 +147,35 @@ a:hover { text-decoration: underline; }
 .exit-btn { font-size: 1.3rem; color: var(--muted); line-height: 1; }
 .exit-btn:hover { color: var(--ink); text-decoration: none; }
 
-.step { animation: rise .35s ease both; margin-bottom: 24px; }
+.step-count {
+  font-size: .85rem; font-weight: 700; color: var(--muted);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.stage { min-height: 300px; }
+.step { margin-bottom: 24px; }
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+/* page transitions */
+@keyframes enterR { from { opacity: 0; transform: translateX(48px); } to { opacity: 1; transform: none; } }
+@keyframes enterL { from { opacity: 0; transform: translateX(-48px); } to { opacity: 1; transform: none; } }
+@keyframes leaveL { to { opacity: 0; transform: translateX(-48px); } }
+@keyframes leaveR { to { opacity: 0; transform: translateX(48px); } }
+.enter-right { animation: enterR .25s ease both; }
+.enter-left  { animation: enterL .25s ease both; }
+.leave-left  { animation: leaveL .2s ease both; }
+.leave-right { animation: leaveR .2s ease both; }
+@media (prefers-reduced-motion: reduce) {
+  .enter-right, .enter-left, .leave-left, .leave-right { animation-duration: .01s; }
+}
+
+/* step navigation */
+.step-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; margin-top: 8px;
+}
+.step-nav .btn:disabled {
+  opacity: .4; cursor: default; filter: none; transform: none;
+}
 .step-card {
   background: var(--surface-1); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 26px 28px; box-shadow: var(--shadow);
@@ -209,7 +236,6 @@ a:hover { text-decoration: underline; }
   border: 2px solid var(--border);
 }
 .btn.small { padding: 8px 18px; font-size: .9rem; }
-.continue-row { display: flex; justify-content: center; margin: 8px 0 32px; }
 
 /* widgets */
 .widget {

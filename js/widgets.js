@@ -369,6 +369,7 @@ WIDGETS.xornet = (el) => {
     if (timer) { clearInterval(timer); timer = null; trainBtn.textContent = '▶ Train'; return; }
     trainBtn.textContent = '⏸ Pause';
     timer = setInterval(() => {
+      if (!canvas.isConnected) { clearInterval(timer); timer = null; return; }
       for (let k = 0; k < 20; k++) { const L = trainEpoch(); epoch++; if (epoch % 5 === 0) lossHist.push(L); }
       if (lossHist.length > 400) lossHist = lossHist.filter((_, i) => i % 2 === 0);
       render();
