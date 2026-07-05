@@ -9,7 +9,11 @@ Interactive, Brilliant-style lessons on how AI actually works — free, no build
 1. **AI Foundations** — what "learning" means: features & labels, loss, gradient descent, overfitting
 2. **Neural Networks** — neurons, activations, layers, backprop, and a real XOR network you train live
 3. **How LLMs Work** — tokens, embeddings, attention, next-token prediction, RLHF
-4. **Python & PyTorch** — tensors, autograd, the training loop, and a real MNIST classifier
+4. **Getting the Most from LLMs** — prompting, few-shot & chain-of-thought, RAG, and agents
+5. **Generative AI & Diffusion** — generative vs discriminative, GANs, diffusion, and text-to-image
+6. **AI Safety & Alignment** — the alignment problem, reward hacking, bias, interpretability, dual use
+7. **Python & PyTorch** — tensors, autograd, the training loop, and a real MNIST classifier
+8. **Computer Vision with PyTorch** — convolutions, CNNs, and transfer learning
 
 ## Features
 

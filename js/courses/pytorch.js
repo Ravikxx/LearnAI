@@ -345,7 +345,7 @@ opt = torch.optim.Adam(model.parameters(), lr=0.001)</code></pre>
           <p>You can read and write the code that trains neural networks. Next moves:</p>
           <ul>
             <li><strong>Run it for real</strong> — <a href="https://colab.research.google.com" target="_blank" rel="noopener">Google Colab</a> gives you free GPUs in the browser; paste the XOR and MNIST code and experiment. Break things. Change layer sizes, learning rates, activations, and watch what happens.</li>
-            <li><strong>Level up the model</strong> — swap the linear layers for <code>nn.Conv2d</code> (the sliding-detector CNNs from the Neural Networks course) and push MNIST past 99%.</li>
+            <li><strong>Level up the model</strong> — the next course, <strong>Computer Vision with PyTorch</strong>, swaps these linear layers for <code>nn.Conv2d</code> to build real CNNs (and push MNIST past 99%).</li>
             <li><strong>Official tutorials</strong> — <a href="https://pytorch.org/tutorials/" target="_blank" rel="noopener">pytorch.org/tutorials</a> continues exactly where this leaves off.</li>
           </ul>
           <p>Every concept in this course sat on top of the earlier ones: tensors carry the data, autograd runs backprop, optimizers run gradient descent, the loop minimizes loss, and the test set keeps you honest. That stack — from "what is learning?" to working code — is yours now.</p>` },

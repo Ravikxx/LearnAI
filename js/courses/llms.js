@@ -232,7 +232,7 @@ COURSES.push({
             <li>Why hallucinations happen (plausibility ≠ truth)</li>
             <li>Why ChatGPT is polite (RLHF)</li>
           </ul>
-          <p>Next on the roadmap: a <strong>Python & PyTorch</strong> course — where you stop reading about tensors and start training real models yourself. 🚀</p>` },
+          <p>Next up: <strong>Getting the Most from LLMs</strong> — now that you know how they work, learn to actually drive one: prompting, retrieval, and agents. 🚀</p>` },
       ],
     },
   ],
