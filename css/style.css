@@ -192,6 +192,13 @@ a:hover { text-decoration: underline; }
   font-size: .88em; background: color-mix(in srgb, var(--ink) 7%, var(--surface-1));
   padding: 2px 6px; border-radius: 6px;
 }
+.step-card pre {
+  background: color-mix(in srgb, var(--ink) 6%, var(--surface-1));
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px 16px; margin: 12px 0; overflow-x: auto;
+  line-height: 1.5;
+}
+.step-card pre code { background: none; padding: 0; font-size: .86rem; }
 .callout {
   border-left: 4px solid var(--accent, var(--series-1));
   background: color-mix(in srgb, var(--accent, var(--series-1)) 7%, var(--surface-1));
@@ -274,6 +281,46 @@ a:hover { text-decoration: underline; }
   background: var(--surface-1); user-select: none;
 }
 .attn-token.sel { border-color: var(--series-1); }
+
+/* AI tutor */
+.tutor-row { margin-top: 12px; }
+.tutor-btn {
+  font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer;
+  color: var(--muted); background: none; border: none; padding: 4px 2px;
+  text-decoration: underline dotted; text-underline-offset: 3px;
+}
+.tutor-btn:hover { color: var(--ink); }
+.tutor-panel {
+  margin-top: 10px; padding: 16px; border-radius: 12px;
+  background: var(--surface-1); border: 1px solid var(--border);
+  box-shadow: var(--shadow); animation: rise .25s ease both;
+  font-size: .93rem;
+}
+.tutor-quicks { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.tutor-quick { font-size: .82rem; }
+.tutor-input { resize: vertical; min-height: 42px; flex: 1; }
+.tutor-thread { display: grid; gap: 8px; margin-top: 8px; }
+.tutor-msg { padding: 10px 14px; border-radius: 10px; }
+.tutor-q {
+  background: color-mix(in srgb, var(--series-1) 10%, var(--surface-1));
+  font-weight: 600; font-size: .88rem;
+}
+.tutor-a { background: var(--page); border: 1px solid var(--border); }
+.tutor-a p { margin-bottom: 8px; }
+.tutor-a p:last-child { margin-bottom: 0; }
+.tutor-a code {
+  font-family: ui-monospace, Menlo, monospace; font-size: .85em;
+  background: color-mix(in srgb, var(--ink) 7%, var(--surface-1));
+  padding: 1px 5px; border-radius: 5px;
+}
+.tutor-error { color: var(--bad); font-size: .88rem; margin-top: 6px; }
+.tutor-setup p { margin-bottom: 10px; }
+.tutor-provider {
+  display: flex; align-items: center; gap: 8px; cursor: pointer;
+  padding: 8px 12px; border: 2px solid var(--border); border-radius: 10px;
+}
+.tutor-provider:has(input:checked) { border-color: var(--series-1); }
+.tutor-provider em { color: var(--muted); font-size: .82rem; }
 
 /* completion */
 .complete-card {

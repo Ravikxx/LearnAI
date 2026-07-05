@@ -243,13 +243,13 @@ WIDGETS.gradient = (el) => {
     ctx.beginPath(); ctx.arc(px(x), py(f(x)), 9, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = cssVar('--surface-1'); ctx.lineWidth = 2; ctx.stroke();
     const g = df(x);
-    out.innerHTML = `position x = <b>${x.toFixed(3)}</b> &nbsp;|&nbsp; loss = <b>${f(x).toFixed(3)}</b> &nbsp;|&nbsp; gradient = <b>${g.toFixed(3)}</b> ${Math.abs(g) < 0.02 ? '✅ converged!' : g > 0 ? '(downhill is ←)' : '(downhill is →)'}`;
+    out.innerHTML = `position x = <b>${x.toFixed(3)}</b> &nbsp;|&nbsp; loss = <b>${f(x).toFixed(3)}</b> &nbsp;|&nbsp; gradient = <b>${g.toFixed(3)}</b> ${Math.abs(g) < 0.02 ? '<b>converged</b>' : g > 0 ? '(downhill is ←)' : '(downhill is →)'}`;
   }
   const row = document.createElement('div');
   row.className = 'w-row';
   const stepBtn = document.createElement('button');
   stepBtn.className = 'btn small';
-  stepBtn.textContent = 'Step ⬇';
+  stepBtn.textContent = 'Step';
   stepBtn.onclick = () => {
     trail.push(x);
     if (trail.length > 40) trail.shift();
@@ -357,7 +357,7 @@ WIDGETS.xornet = (el) => {
       return `${x[0]} XOR ${x[1]} → <b style="color:${ok ? cssVar('--good-text') : cssVar('--bad')}">${o.toFixed(2)}</b> (want ${T[i]})`;
     });
     const solved = X.every((x, i) => Math.round(forward(x).o) === T[i]);
-    out.innerHTML = `epoch <b>${epoch}</b> &nbsp;|&nbsp; loss = <b>${(lossHist[lossHist.length - 1] ?? 0.25).toFixed(4)}</b>${solved && epoch > 0 ? ' &nbsp;🎉 <b>solved!</b>' : ''}<br>` + preds.join('<br>');
+    out.innerHTML = `epoch <b>${epoch}</b> &nbsp;|&nbsp; loss = <b>${(lossHist[lossHist.length - 1] ?? 0.25).toFixed(4)}</b>${solved && epoch > 0 ? ' &nbsp;<b>solved</b>' : ''}<br>` + preds.join('<br>');
   }
 
   const row = document.createElement('div');
@@ -618,7 +618,7 @@ WIDGETS.temperature = (el) => {
   row.className = 'w-row';
   const btn = document.createElement('button');
   btn.className = 'btn small';
-  btn.textContent = '🎲 Sample';
+  btn.textContent = 'Sample';
   btn.onclick = sample;
   const btn10 = document.createElement('button');
   btn10.className = 'btn small ghost';

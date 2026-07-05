@@ -53,15 +53,6 @@
       </div>
       <div class="course-grid">
         ${cards}
-        <div class="course-card locked" style="--accent:var(--series-3)">
-          <div class="course-head">
-            <div class="course-icon">🔥</div>
-            <div>
-              <h2>Python &amp; PyTorch <span style="font-size:.8rem;font-weight:600;color:var(--muted)">— coming soon</span></h2>
-              <div class="tagline">Tensors, autograd, and training your first real model</div>
-            </div>
-          </div>
-        </div>
       </div>`;
   }
 
@@ -72,10 +63,10 @@
       const done = S.done[c.id + '/' + l.id];
       return `
         <a class="lesson-row ${done ? 'done' : ''}" href="#lesson/${c.id}/${l.id}" style="--accent:${c.accent}">
-          <div class="lesson-num">${done ? '✓' : i + 1}</div>
+          <div class="lesson-num">${i + 1}</div>
           <div class="lesson-info">
             <h3>${l.title}</h3>
-            <div class="meta">~${l.minutes} min · ${l.steps.filter(s => s.t === 'quiz').length} questions${l.steps.some(s => s.t === 'widget') ? ' · 🕹 interactive' : ''}</div>
+            <div class="meta">~${l.minutes} min · ${l.steps.filter(s => s.t === 'quiz').length} questions${l.steps.some(s => s.t === 'widget') ? ' · interactive' : ''}</div>
           </div>
           <div class="lesson-go">›</div>
         </a>`;
@@ -127,7 +118,7 @@
       countEl.textContent = `${idx + 1} / ${l.steps.length}`;
       backBtn.disabled = idx === 0;
       nextBtn.disabled = quizLocked(idx);
-      nextBtn.innerHTML = idx === l.steps.length - 1 ? 'Finish 🎉' : 'Next →';
+      nextBtn.innerHTML = idx === l.steps.length - 1 ? 'Finish' : 'Next →';
     }
 
     function buildStep(i) {
@@ -163,7 +154,7 @@
           const correct = chosen === step.a;
           const why = document.createElement('div');
           why.className = 'quiz-why ' + (correct ? 'ok' : 'no');
-          why.innerHTML = `<b>${correct ? (fresh ? '✅ Correct! +5 XP' : '✅ Correct!') : '❌ Not quite.'}</b>${step.why}`;
+          why.innerHTML = `<b>${correct ? (fresh ? 'Correct — +5 XP' : 'Correct') : 'Not quite'}</b>${step.why}`;
           card.append(why);
         }
 
@@ -182,7 +173,55 @@
         });
         if (answers[i] !== undefined) paintAnswered(answers[i], false);
       }
+
+      // AI tutor: available on every step, with context about what's on screen
+      const tutorRow = document.createElement('div');
+      tutorRow.className = 'tutor-row';
+      const tutorBtn = document.createElement('button');
+      tutorBtn.className = 'tutor-btn';
+      tutorBtn.textContent = 'Ask the AI tutor';
+      tutorBtn.onclick = () => TUTOR.toggle(tutorRow, () => tutorContext(i));
+      tutorRow.append(tutorBtn);
+      wrap.append(tutorRow);
       return wrap;
+    }
+
+    function stripHtml(html) {
+      const d = document.createElement('div');
+      d.innerHTML = html;
+      return d.textContent.replace(/\s+/g, ' ').trim();
+    }
+
+    function tutorContext(i) {
+      const step = l.steps[i];
+      const head = `Course: "${c.title}". Lesson: "${l.title}".`;
+      if (step.t === 'quiz') {
+        const chosen = answers[i];
+        const answered = chosen !== undefined;
+        const lines = [
+          head,
+          `The student is on a quiz question: "${stripHtml(step.q)}"`,
+          `Options: ${step.opts.map((o, oi) => `${oi + 1}) ${stripHtml(o)}`).join(' ')}`,
+          `The correct answer is option ${step.a + 1}.`,
+          answered
+            ? `The student chose option ${chosen + 1}, which was ${chosen === step.a ? 'correct' : 'incorrect'}.`
+            : 'The student has not answered yet — do NOT reveal which option is correct; give hints instead.',
+          `The lesson's explanation for the answer: ${stripHtml(step.why)}`,
+        ];
+        const quickPrompts = answered
+          ? (chosen === step.a
+            ? ['Why exactly is my answer right?', 'Why are the other options wrong?', 'Give me a harder version of this question']
+            : ['Why was my answer wrong?', 'Explain the correct answer differently', 'Give me a similar question to practice'])
+          : ['Give me a hint (don\'t spoil the answer)', 'Explain the question in simpler terms'];
+        return { text: lines.join('\n'), quickPrompts };
+      }
+      const body = step.t === 'widget'
+        ? `The student is on an interactive demo ("${step.name}"). Intro text: ${stripHtml(step.md || '')}`
+        : `The step's content: ${stripHtml(step.md)}`;
+      return {
+        text: `${head}\n${step.title ? `Step title: "${step.title}".` : ''}\n${body}`,
+        quickPrompts: ['Explain this more simply', 'Give me a real-world example', 'How does this connect to the bigger picture?'],
+      };
     }
 
     function show(i, dir) {
@@ -223,7 +262,7 @@
       if (old) old.classList.add('leave-left');
       navEl.style.display = 'none';
       pbar.style.width = '100%';
-      countEl.textContent = '✓';
+      countEl.textContent = 'done';
       setTimeout(() => {
         stage.innerHTML = '';
         const div = document.createElement('div');
