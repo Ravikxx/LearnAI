@@ -15,7 +15,7 @@ COURSES.push({
       minutes: 10,
       steps: [
         { t: 'text', title: 'The one data structure that matters', md: `
-          <p>Everything in PyTorch is a <strong>tensor</strong>: a grid of numbers with any number of dimensions. A single number is a 0-D tensor, a list is 1-D, a table is 2-D, a color image is 3-D (height × width × channels), a batch of images is 4-D.</p>
+          <p>Everything in PyTorch is a <strong>tensor</strong>: a grid of numbers with any number of dimensions. A number is 0-D, a list is 1-D, a table is 2-D, a color image is 3-D (height × width × channels), a batch of images is 4-D.</p>
           <pre><code>import torch
 
 x = torch.tensor([[1., 2., 3.],
@@ -23,7 +23,7 @@ x = torch.tensor([[1., 2., 3.],
 
 print(x.shape)   # torch.Size([2, 3])
 print(x.dtype)   # torch.float32</code></pre>
-          <p>The <strong>shape</strong> tells you the size along each dimension — here 2 rows, 3 columns. You will spend a shocking amount of your PyTorch life reasoning about shapes.</p>` },
+          <div class="callout">💡 The <strong>shape</strong> is the size along each dimension — here 2 rows, 3 columns. You'll spend a shocking amount of your PyTorch life reasoning about shapes.</div>` },
         { t: 'quiz',
           q: 'A dataset holds 640 grayscale images, each 28×28 pixels, as one tensor. What\'s its shape?',
           opts: [
@@ -39,14 +39,21 @@ print(x.dtype)   # torch.float32</code></pre>
 torch.ones(5)          # [1., 1., 1., 1., 1.]
 torch.randn(3, 4)      # 3×4 of random normal values
 torch.arange(6)        # [0, 1, 2, 3, 4, 5]</code></pre>
-          <p><code>randn</code> matters more than it looks: <em>random normal values are how every network's weights start life</em> — remember, training begins from a random spot on the loss landscape.</p>` },
+          <div class="callout">💡 <code>randn</code> matters more than it looks: random normal values are how every network's weights start life — training begins from a random spot on the loss landscape.</div>` },
         { t: 'text', title: 'Reshaping', md: `
           <p>Same numbers, different grid. <code>reshape</code> reorganizes a tensor as long as the total element count matches:</p>
           <pre><code>x = torch.arange(12)     # shape (12,)
 a = x.reshape(3, 4)      # shape (3, 4)
-b = x.reshape(2, 6)      # shape (2, 6)
 c = x.reshape(4, -1)     # -1 means "figure it out" → (4, 3)</code></pre>
-          <p>Indexing and slicing work like Python lists, but per dimension: <code>a[0]</code> is the first row, <code>a[:, 1]</code> is the second column, <code>a[0, 1]</code> is one element.</p>` },
+          <p>Indexing works per dimension: <code>a[0]</code> is the first row, <code>a[:, 1]</code> is the second column, <code>a[0, 1]</code> is one element.</p>` },
+        { t: 'widget', name: 'match', title: 'Match each piece to what it does', pairs: [
+          ['torch.zeros(2, 3)', 'A 2×3 grid of zeros'],
+          ['torch.randn(3, 4)', 'Random normal values — how weights start out'],
+          ['torch.arange(6)', 'Sequential values 0 through 5'],
+          ['x.reshape(4, -1)', 'Re-grids into 4 rows, auto-computing the columns'],
+          ['x[:, 1]', 'Every row, just the second column'],
+          ['x.shape', 'The size along each dimension'],
+        ] },
         { t: 'quiz',
           q: 'x has shape (3, 4). Which reshape FAILS?',
           opts: [
@@ -59,9 +66,9 @@ c = x.reshape(4, -1)     # -1 means "figure it out" → (4, 3)</code></pre>
         { t: 'text', title: 'Why not just use Python lists?', md: `
           <p>Three reasons tensors exist:</p>
           <ul>
-            <li><strong>Speed</strong> — <code>x * 2</code> on a million-element tensor runs as one vectorized C/CUDA operation, hundreds of times faster than a Python loop.</li>
-            <li><strong>GPU support</strong> — <code>x.to('cuda')</code> moves the tensor to the GPU; every subsequent op runs on thousands of cores. (Remember why GPUs won: matrix math is embarrassingly parallel.)</li>
-            <li><strong>Autograd</strong> — tensors can remember how they were computed, so PyTorch can run backprop through them automatically. That's the next lesson's star.</li>
+            <li><strong>Speed</strong> — <code>x * 2</code> on a million-element tensor is one vectorized C/CUDA op, hundreds of times faster than a Python loop.</li>
+            <li><strong>GPU support</strong> — <code>x.to('cuda')</code> moves it to thousands of GPU cores. (Matrix math is embarrassingly parallel — why GPUs won.)</li>
+            <li><strong>Autograd</strong> — tensors remember how they were computed, so PyTorch can backprop through them automatically. Next lesson's star.</li>
           </ul>` },
         { t: 'quiz',
           q: 'Your training script computes everything correctly but takes forever. You discover the code processes pixels with nested Python for-loops. The fix?',
@@ -88,7 +95,7 @@ b = torch.tensor([[10., 20.],
 
 a * b     # ELEMENTWISE: [[10, 40], [90, 160]]
 a @ b     # MATRIX MULTIPLY: [[70, 100], [150, 220]]</code></pre>
-          <p><code>*</code> pairs up matching positions. <code>@</code> is real matrix multiplication — rows dotted with columns. A neural network layer is <code>x @ W + b</code>: matrix multiply, exactly the "weighted sum" every neuron computes, done for all neurons and all examples at once.</p>` },
+          <div class="callout">💡 <code>*</code> pairs up matching positions. <code>@</code> is real matrix multiplication — rows dotted with columns. A neural network layer is <code>x @ W + b</code>: the "weighted sum" every neuron computes, done for all neurons and examples at once.</div>` },
         { t: 'quiz',
           q: 'For a @ b to work, a has shape (32, 10). Which shape must b have?',
           opts: [
@@ -104,7 +111,7 @@ a @ b     # MATRIX MULTIPLY: [[70, 100], [150, 220]]</code></pre>
 b = torch.randn(10)       # one bias per feature
 
 y = x + b                 # b is stretched across all 32 rows</code></pre>
-          <p>That's why <code>x @ W + b</code> works even though <code>x @ W</code> is a matrix and <code>b</code> is a vector — the bias broadcasts across the batch. No copying happens under the hood; it's free.</p>` },
+          <p>That's why <code>x @ W + b</code> works even though <code>b</code> is just a vector — it broadcasts across the batch, with no copying under the hood.</p>` },
         { t: 'quiz',
           q: 'a has shape (3, 1) and b has shape (1, 4). What is (a + b).shape?',
           opts: [
@@ -133,13 +140,21 @@ x.argmax(dim=1)  # [2, 2] — index of the max in each row</code></pre>
           ],
           a: 1,
           why: '"dim=0" means "reduce along dimension 0" — the 2 rows collapse into 1, leaving the 3 columns. Naming the dimension that DISAPPEARS feels backwards at first; this quiz exists because everyone gets it wrong once.' },
+        { t: 'widget', name: 'match', title: 'Match the op to what it does', pairs: [
+          ['a * b', 'Elementwise: multiplies matching positions'],
+          ['a @ b', 'Matrix multiply: rows dotted with columns'],
+          ['x + b (mismatched shapes)', 'Broadcasting: a size-1 dimension stretches to fit'],
+          ['x.sum(dim=0)', 'Collapses rows, leaves one value per column'],
+          ['x.sum(dim=1)', 'Collapses columns, leaves one value per row'],
+          ['x.argmax(dim=1)', 'Index of the largest value in each row'],
+        ] },
         { t: 'text', title: 'Devices', md: `
           <p>Tensors live somewhere — CPU by default, GPU on request:</p>
           <pre><code>device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 x = x.to(device)
 model = model.to(device)</code></pre>
-          <p>Rules: ops require all tensors on the <em>same</em> device (mixing raises an error), and this two-line pattern at the top of a script is universal. No GPU on your machine? Google Colab gives you a free one in the browser.</p>` },
+          <p>Ops require all tensors on the <em>same</em> device — mixing raises an error. This two-line pattern sits atop nearly every PyTorch script. No GPU handy? Google Colab gives you a free one in the browser.</p>` },
       ],
     },
     {
@@ -155,7 +170,7 @@ y = x**2 + 2*x      # y = 15.0, and PyTorch remembers HOW
 
 y.backward()         # run backprop
 print(x.grad)        # tensor(8.) — the gradient dy/dx = 2x + 2 = 8</code></pre>
-          <p><code>requires_grad=True</code> means "track this tensor." <code>.backward()</code> walks the recorded operations in reverse and fills <code>.grad</code> on every tracked tensor. That's the entire backward pass from the Neural Networks course, in one method call.</p>` },
+          <div class="callout">💡 <code>requires_grad=True</code> means "track this tensor." <code>.backward()</code> walks the recorded operations in reverse and fills <code>.grad</code> — the entire backward pass from the Neural Networks course, in one method call.</div>` },
         { t: 'quiz',
           q: 'x = torch.tensor(4.0, requires_grad=True); y = x**2; y.backward(). What is x.grad?',
           opts: [
@@ -166,10 +181,18 @@ print(x.grad)        # tensor(8.) — the gradient dy/dx = 2x + 2 = 8</code></pr
           a: 1,
           why: 'The gradient of x² is 2x, so at x=4 it\'s 8. Meaning: nudge x up by a tiny amount and y rises 8× as fast. Gradient descent would now step x DOWNHILL: x = x − lr × 8.' },
         { t: 'text', title: 'Two gotchas everyone hits', md: `
-          <p><strong>Gotcha 1: gradients accumulate.</strong> Call <code>.backward()</code> twice and the second gradient <em>adds to</em> the first instead of replacing it. That's why every training loop calls <code>optimizer.zero_grad()</code> before each backward pass.</p>
-          <p><strong>Gotcha 2: tracking costs memory.</strong> When you're just <em>using</em> a trained model (no learning), wrap the code so PyTorch skips the bookkeeping:</p>
+          <p><strong>Gotcha 1: gradients accumulate.</strong> Call <code>.backward()</code> twice and the second gradient <em>adds to</em> the first instead of replacing it. That's why every training loop calls <code>optimizer.zero_grad()</code> first.</p>
+          <p><strong>Gotcha 2: tracking costs memory.</strong> When you're just <em>using</em> a trained model (no learning), skip the bookkeeping:</p>
           <pre><code>with torch.no_grad():
     predictions = model(test_data)   # faster, less memory</code></pre>` },
+        { t: 'widget', name: 'classify', title: 'Tracked or not?', buckets: ['Gradients tracked', 'Gradients NOT tracked'], items: [
+          ['x = torch.tensor(2.0, requires_grad=True)', 0],
+          ['y = x**2 computed during training', 0],
+          ['Any tensor computed from a requires_grad tensor via math ops', 0],
+          ['Running model(data) inside torch.no_grad()', 1],
+          ['A plain tensor: torch.tensor(5.0) (default settings)', 1],
+          ['Using a trained model purely for inference', 1],
+        ] },
         { t: 'quiz',
           q: 'A student forgets zero_grad() in their training loop. What happens?',
           opts: [
@@ -179,9 +202,18 @@ print(x.grad)        # tensor(8.) — the gradient dy/dx = 2x + 2 = 8</code></pr
           ],
           a: 2,
           why: 'No error, just silently wrong behavior — the worst kind of bug. Step 1\'s blame is still in .grad when step 2 adds its own, so the update direction is polluted by history. The loop mantra is always: zero_grad → backward → step.' },
+        { t: 'quiz',
+          q: 'You\'re running a trained model on new data and never call .backward(). What should you do?',
+          opts: [
+            'Nothing special needed',
+            'Wrap the code in torch.no_grad() — no gradients needed, so skip the tracking overhead',
+            'Set requires_grad=True on the output to be safe',
+          ],
+          a: 1,
+          why: 'Inference doesn\'t need gradients, so torch.no_grad() tells PyTorch to skip building the computation graph — less memory, faster forward passes. You\'ll use this pattern every time you evaluate or deploy a model.' },
         { t: 'text', title: 'Why this design is powerful', md: `
-          <p>Because autograd records operations <em>as they run</em>, you can put anything in your model — loops, if-statements, arbitrary Python — and gradients still flow through whatever actually executed. This "define-by-run" flexibility is a big reason researchers adopted PyTorch over its more rigid early rivals.</p>
-          <p>Connect the dots: autograd computes the gradients (lesson: backprop), an optimizer uses them to update weights (lesson: gradient descent), a loss provides the target (lesson: loss). You've now met all the machinery — next lesson assembles it into a real network.</p>` },
+          <p>Autograd records operations <em>as they run</em>, so you can put loops, if-statements, arbitrary Python in your model and gradients still flow through whatever actually executed. This "define-by-run" flexibility is a big reason researchers adopted PyTorch over its more rigid early rivals.</p>
+          <p>Connect the dots: autograd computes gradients (backprop), an optimizer applies them (gradient descent), a loss sets the target. You've met all the machinery — next lesson assembles it into a real network.</p>` },
       ],
     },
     {
@@ -200,7 +232,7 @@ model = nn.Sequential(
 )
 
 output = model(torch.tensor([[1., 0.]]))</code></pre>
-          <p>Recognize it? This is <em>exactly</em> the 2 → 4 → 1 network from the XOR widget you trained in the Neural Networks course.</p>` },
+          <p>Recognize it? This is <em>exactly</em> the 2 → 4 → 1 network from the XOR widget in the Neural Networks course.</p>` },
         { t: 'quiz',
           q: 'How many learnable parameters does nn.Linear(2, 4) contain?',
           opts: [
@@ -217,7 +249,7 @@ loss_fn = nn.CrossEntropyLoss()      # classification: pick-a-category
 
 optimizer = torch.optim.SGD(model.parameters(), lr=0.1)   # plain gradient descent
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001) # the smart default</code></pre>
-          <p><code>model.parameters()</code> hands the optimizer every weight and bias in the model — the knobs it's allowed to turn. <strong>Adam</strong> is gradient descent with adaptive per-knob step sizes; when in doubt, use it.</p>` },
+          <div class="callout">💡 <code>model.parameters()</code> hands the optimizer every weight and bias — the knobs it's allowed to turn. <strong>Adam</strong> is gradient descent with adaptive per-knob step sizes; when in doubt, use it.</div>` },
         { t: 'quiz',
           q: 'You\'re classifying images into 10 digit classes. Which loss function?',
           opts: [
@@ -237,6 +269,13 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.001) # the smart default</
     loss.backward()              # backprop: assign blame
     optimizer.step()             # nudge every knob downhill</code></pre>
           <p>Forward, loss, zero, backward, step. GPT training is this loop with more zeros on the end.</p>` },
+        { t: 'widget', name: 'order', title: 'Put the training loop in order', items: [
+          'Forward pass: pred = model(X)',
+          'Compute the loss: loss = loss_fn(pred, y)',
+          'Clear old gradients: optimizer.zero_grad()',
+          'Backprop: loss.backward()',
+          'Update the weights: optimizer.step()',
+        ] },
         { t: 'quiz',
           q: 'A beginner writes: loss.backward() → optimizer.zero_grad() → optimizer.step(). What goes wrong?',
           opts: [
@@ -268,7 +307,7 @@ for epoch in range(2000):
     opt.step()
 
 print(model(X).round())   # tensor([[0.],[1.],[1.],[0.]])</code></pre>
-          <p>Paste it into Google Colab and run it. Watching your own code learn something a single neuron provably cannot — that's the moment this stops being theory.</p>` },
+          <p>Paste it into Google Colab and run it — watching your own code learn something a single neuron provably cannot is the moment this stops being theory.</p>` },
       ],
     },
     {
@@ -288,7 +327,7 @@ test_ds  = datasets.MNIST('data', train=False,
 
 train_dl = DataLoader(train_ds, batch_size=64, shuffle=True)
 test_dl  = DataLoader(test_ds,  batch_size=64)</code></pre>
-          <p>Note the built-in train/test split — the honest-evaluation discipline from the Foundations course, baked into the library.</p>` },
+          <div class="callout">💡 Note the built-in train/test split — the honest-evaluation discipline from the Foundations course, baked into the library.</div>` },
         { t: 'quiz',
           q: 'Why train on batches of 64 images instead of all 60,000 at once?',
           opts: [
@@ -307,7 +346,7 @@ test_dl  = DataLoader(test_ds,  batch_size=64)</code></pre>
 )
 loss_fn = nn.CrossEntropyLoss()
 opt = torch.optim.Adam(model.parameters(), lr=0.001)</code></pre>
-          <p>Flatten unrolls each image into 784 numbers (shape reasoning from lesson 1). Two layers with a ReLU between them (the bend that makes depth work). Ten outputs — the model's confidence score for each digit.</p>` },
+          <p>Flatten unrolls each image into 784 numbers. Two layers with a ReLU between them. Ten outputs — the model's confidence score for each digit.</p>` },
         { t: 'quiz',
           q: 'The model ends with 10 raw scores per image. How do you get the actual predicted digit?',
           opts: [
@@ -332,6 +371,14 @@ opt = torch.optim.Adam(model.parameters(), lr=0.001)</code></pre>
             correct += (pred == labels).sum().item()
     print(f"epoch {epoch}: test accuracy {correct/10000:.1%}")</code></pre>
           <p>Same five-line loop, now fed by a DataLoader, with an honest test-set evaluation after each epoch. Typical result after 3 epochs: <strong>~97% accuracy</strong> — a program that reads handwriting, built from parts you fully understand.</p>` },
+        { t: 'widget', name: 'match', title: 'Match the piece to its job', pairs: [
+          ['DataLoader(train_ds, batch_size=64, shuffle=True)', 'Serves the data in small, shuffled batches'],
+          ['nn.Flatten()', 'Unrolls each 28×28 image into 784 numbers'],
+          ['nn.CrossEntropyLoss()', 'Scores how wrong the 10 class predictions are'],
+          ['torch.no_grad()', 'Skips gradient tracking during evaluation'],
+          ['scores.argmax(dim=1)', 'Picks the predicted digit from the 10 scores'],
+          ['train/test split', 'Keeps evaluation honest by holding out unseen data'],
+        ] },
         { t: 'quiz',
           q: 'Your model shows 99.8% accuracy on training data but 91% on the test set. Diagnosis?',
           opts: [
@@ -344,11 +391,11 @@ opt = torch.optim.Adam(model.parameters(), lr=0.001)</code></pre>
         { t: 'text', title: 'You\'re a practitioner now — where to go', md: `
           <p>You can read and write the code that trains neural networks. Next moves:</p>
           <ul>
-            <li><strong>Run it for real</strong> — <a href="https://colab.research.google.com" target="_blank" rel="noopener">Google Colab</a> gives you free GPUs in the browser; paste the XOR and MNIST code and experiment. Break things. Change layer sizes, learning rates, activations, and watch what happens.</li>
+            <li><strong>Run it for real</strong> — <a href="https://colab.research.google.com" target="_blank" rel="noopener">Google Colab</a> gives you free GPUs in the browser; paste the XOR and MNIST code, break things, and watch what happens.</li>
             <li><strong>Level up the model</strong> — the next course, <strong>Computer Vision with PyTorch</strong>, swaps these linear layers for <code>nn.Conv2d</code> to build real CNNs (and push MNIST past 99%).</li>
-            <li><strong>Official tutorials</strong> — <a href="https://pytorch.org/tutorials/" target="_blank" rel="noopener">pytorch.org/tutorials</a> continues exactly where this leaves off.</li>
+            <li><strong>Official tutorials</strong> — <a href="https://pytorch.org/tutorials/" target="_blank" rel="noopener">pytorch.org/tutorials</a> continues where this leaves off.</li>
           </ul>
-          <p>Every concept in this course sat on top of the earlier ones: tensors carry the data, autograd runs backprop, optimizers run gradient descent, the loop minimizes loss, and the test set keeps you honest. That stack — from "what is learning?" to working code — is yours now.</p>` },
+          <p>Tensors carry the data, autograd runs backprop, optimizers run gradient descent, the loop minimizes loss, the test set keeps you honest. That stack — from "what is learning?" to working code — is yours now.</p>` },
       ],
     },
   ],
