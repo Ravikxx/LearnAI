@@ -98,6 +98,8 @@ COURSES.push({
           ],
           a: 1,
           why: 'The network is a denoiser: predict-the-noise, subtract a step, repeat. Training on "add noise, learn to reverse it" is stable and has a clear target at every step (the noise you actually added) — unlike a GAN\'s shifting adversarial goal.' },
+        { t: 'widget', name: 'diffusion', title: 'Try it: generate an image from noise', md: `
+          <p>Start from pure random noise, then press <strong>Generate</strong> and watch a picture emerge one denoising step at a time. Switch the prompt (heart, triangle, ring) to see the <em>same</em> process steered toward different images — that steering is exactly how text-to-image works.</p>` },
         { t: 'text', title: 'Why this beats the GAN duel', md: `
           <p>Diffusion swaps one hard leap for many easy steps. Instead of a generator conjuring a full image in one shot (and a rival trying to catch it), the model makes dozens of small, well-defined denoising steps, each with a concrete target: the noise added at that step.</p>
           <ul>

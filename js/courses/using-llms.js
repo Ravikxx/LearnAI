@@ -127,6 +127,8 @@ COURSES.push({
             <li>Paste those chunks into the prompt, and let the model answer from them.</li>
           </ol>
           <div class="callout">💡 Retrieval matches on <em>meaning</em>, not keywords — a question about "canceling my plan" can pull up a doc titled "Ending your subscription," because their embeddings sit close together.</div>` },
+        { t: 'widget', name: 'embeddings', title: 'Try it: retrieval by meaning', md: `
+          <p>RAG's retrieval step works on a map like this. Click a word to see its nearest neighbors — retrieval does exactly this, pulling the document chunks whose meaning-vectors sit closest to your question, even when they share no words.</p>` },
         { t: 'quiz',
           q: 'RAG retrieves by embedding similarity rather than exact keyword match. Why is that an advantage?',
           opts: [

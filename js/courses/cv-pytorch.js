@@ -70,6 +70,8 @@ COURSES.push({
           <p>What does a filter actually <em>do</em>? Each one is a little pattern-detector. A filter tuned to a vertical edge lights up its feature map wherever a vertical edge appears; another fires on a patch of a certain color, or a corner.</p>
           <p>Crucially, nobody hand-designs these filters — they\'re <strong>learned</strong>, just like any other weights, by gradient descent. Training discovers whatever detectors reduce the loss.</p>
           <p>A conv layer applies <em>many</em> filters at once (say 32), producing 32 feature maps — 32 different views of "what patterns are where."</p>` },
+        { t: 'widget', name: 'convolution', title: 'Try it: slide a filter over an image', md: `
+          <p>Pick a filter and watch it sweep the image, cell by cell, building a <strong>feature map</strong>. Compare the vertical-edge and horizontal-edge filters on the square — see how each lights up different borders. That is a convolution, live.</p>` },
         { t: 'text', title: 'Stacking builds a hierarchy', md: `
           <p>Here\'s the beautiful part. Stack convolution layers, and each one operates on the feature maps of the last. This builds a <strong>hierarchy of features</strong>:</p>
           <ul>

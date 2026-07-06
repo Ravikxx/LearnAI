@@ -61,6 +61,8 @@ COURSES.push({
           ],
           a: 1,
           why: 'Predictability is the payoff. Because the loss-vs-compute relationship is a stable power law, you fit it on affordable runs and extrapolate. That de-risks enormous investments — and it is a big reason the field bet on scale so aggressively. (Note the floor L&#8734;: the curve flattens toward an irreducible entropy, never zero.)' },
+        { t: 'widget', name: 'scaling', title: 'Try it: ride the power law', md: `
+          <p>Drag the compute slider and watch the loss follow the curve. Notice two things: it never reaches zero (the dashed floor L∞), and every 10× of compute buys a smaller and smaller loss reduction — the diminishing returns that shape every training-budget decision.</p>` },
         { t: 'text', title: 'Chinchilla: how to spend a compute budget', md: `
           <p>Given a fixed compute budget, should you build a <em>bigger</em> model or train on <em>more data</em>? DeepMind\'s 2022 "Chinchilla" result answered it: for compute-optimal training, parameters and training tokens should scale <strong>together, in roughly equal proportion</strong> — about <code>20</code> training tokens per parameter.</p>
           <p>This overturned earlier practice. GPT-3 (175B params) was, by this rule, badly <em>under-trained</em> — too big for its data. Chinchilla (70B params) used the same compute but far more data, and beat it. The lesson reshaped the field: for years after, "smaller model, way more tokens" became the winning recipe.</p>

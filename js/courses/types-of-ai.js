@@ -54,6 +54,8 @@ COURSES.push({
           <p>The type you know best. A <strong>text model</strong> (a Large Language Model, or LLM) takes text and produces text: chat, code, summaries, translation, answers.</p>
           <p>Following the edges idea: your text is encoded into <strong>tokens</strong> (word-pieces, each with an ID number), the network processes those numbers, and it outputs a probability for every possible next token. The decoder picks one, appends it, and the loop runs again — that\'s the text streaming onto your screen.</p>
           <p>On a model menu these are labeled "text" or "chat." Everything they do is that one trick: predict the next token, over and over.</p>` },
+        { t: 'widget', name: 'tokenizer', title: 'Try it: how text becomes numbers', md: `
+          <p>This is the encoder from lesson 1, made concrete. Type anything and watch it get chopped into tokens — the numbers a text model actually reads. Common words stay whole; rare ones shatter into pieces.</p>` },
         { t: 'quiz',
           q: 'A text model generating a 500-word essay is really doing what, repeatedly?',
           opts: [
@@ -77,6 +79,8 @@ COURSES.push({
           <p>Here\'s the one that puzzled you on OpenRouter. An <strong>embedding model</strong> takes text (or an image, or audio) and outputs a single fixed list of numbers — a <strong>vector</strong>, maybe 768 or 1,536 numbers long. It does <em>not</em> output words. That vector is a numeric fingerprint of the input\'s <em>meaning</em>.</p>
           <p>The rule that makes it useful: <strong>similar meanings get similar vectors.</strong> "How do I cancel my subscription?" and "I want to end my plan" land at nearly the same coordinates, even though they share almost no words. "Photosynthesis" lands far away.</p>
           <div class="callout">💡 A chat model answers your text. An embedding model measures your text — turning it into coordinates you can compare, sort, and search. Different job, different output type.</div>` },
+        { t: 'widget', name: 'embeddings', title: 'Try it: meaning as coordinates', md: `
+          <p>An embedding model turns each input into a point like these. Click a word to see its nearest neighbors — the ones an embedding model would judge closest in meaning. Similar things sit close together; that proximity is the entire product.</p>` },
         { t: 'quiz',
           q: 'What does an embedding model produce when you feed it a sentence?',
           opts: [
@@ -231,6 +235,8 @@ COURSES.push({
         { t: 'text', title: 'Learning with no teacher: self-play', md: `
           <p>Where do good moves come from with no answer key? For games like Go, the trick is <strong>self-play</strong>: the agent plays millions of games <em>against itself</em>. Wins nudge the moves that led to them upward; losses nudge them down. Over millions of games it bootstraps from random flailing to superhuman skill — and because it isn\'t copying human games, it invents strategies no human taught it (AlphaGo\'s famous "move 37" stunned professionals).</p>
           <p>The reward is the entire teacher. Design the reward well and the agent finds clever ways to earn it; design it carelessly and it finds clever ways to <em>cheat</em> it — the reward-hacking problem from the AI Safety course.</p>` },
+        { t: 'widget', name: 'rlagent', title: 'Try it: watch an agent learn from reward', md: `
+          <p>This agent knows nothing — no map, no language, no idea what "left" means. Press <strong>Train</strong> and watch it learn purely from reward (★ = +1, ✕ = −1): the grid turns green where it discovers value, and arrows show the policy it forms. Then hit <strong>Run agent</strong> to watch it walk the path it taught itself.</p>` },
         { t: 'quiz',
           q: 'In reinforcement learning, what plays the role that labeled answers play in ordinary supervised learning?',
           opts: [

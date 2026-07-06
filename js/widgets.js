@@ -628,3 +628,311 @@ WIDGETS.temperature = (el) => {
   el.append(canvas, slider('temperature', 0.05, 3, 0.05, temp, v => { temp = v; render(); }).row, row, story);
   render();
 };
+
+// ---------- 10. Convolution (CNN filter) ----------
+WIDGETS.convolution = (el) => {
+  const N = 14, cell = 14, gs = N * cell;
+  // input "image": dark background, bright square with a notch → obvious edges
+  const img = [];
+  for (let r = 0; r < N; r++) { img[r] = []; for (let c = 0; c < N; c++) {
+    let v = 0.12;
+    if (r >= 3 && r <= 10 && c >= 3 && c <= 10) v = 0.92;   // bright square
+    if (r >= 6 && r <= 8 && c >= 8 && c <= 10) v = 0.12;    // notch on the right
+    img[r][c] = v;
+  } }
+  const kernels = {
+    'Vertical edge': [[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]],
+    'Horizontal edge': [[-1, -1, -1], [0, 0, 0], [1, 1, 1]],
+    'Blur': [[1 / 9, 1 / 9, 1 / 9], [1 / 9, 1 / 9, 1 / 9], [1 / 9, 1 / 9, 1 / 9]],
+    'Sharpen': [[0, -1, 0], [-1, 5, -1], [0, -1, 0]],
+    'Outline': [[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]],
+  };
+  let kname = 'Vertical edge', out = null, revealed = N * N, scanPos = -1, timer = null;
+
+  function conv(r, c) {
+    const k = kernels[kname]; let s = 0;
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+      const rr = Math.min(N - 1, Math.max(0, r + dr)), cc = Math.min(N - 1, Math.max(0, c + dc));
+      s += img[rr][cc] * k[dr + 1][dc + 1];
+    }
+    return s;
+  }
+  function computeAll() { out = []; for (let r = 0; r < N; r++) { out[r] = []; for (let c = 0; c < N; c++) out[r][c] = conv(r, c); } }
+
+  const canvas = document.createElement('canvas');
+  const W = 540, H = 250, ctx = setupCanvas(canvas, W, H);
+  const outText = document.createElement('div'); outText.className = 'w-out';
+  const leftX = 12, rightX = W - 12 - gs, topY = 34;
+
+  function gray(v) { const g = Math.round(Math.max(0, Math.min(1, v)) * 255); return `rgb(${g},${g},${g})`; }
+  function render() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = cssVar('--surface-1'); ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = cssVar('--ink-2'); ctx.font = '600 12px system-ui'; ctx.textAlign = 'left';
+    ctx.fillText('input image', leftX, topY - 12);
+    ctx.fillText('feature map (' + kname + ')', rightX, topY - 12);
+    let maxAbs = 0; if (out) for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) maxAbs = Math.max(maxAbs, Math.abs(out[r][c]));
+    if (maxAbs === 0) maxAbs = 1;
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      ctx.fillStyle = gray(img[r][c]);
+      ctx.fillRect(leftX + c * cell, topY + r * cell, cell - 0.5, cell - 0.5);
+      const idx = r * N + c;
+      if (out && idx < revealed) { ctx.fillStyle = gray(Math.abs(out[r][c]) / maxAbs); }
+      else { ctx.fillStyle = cssVar('--grid'); }
+      ctx.fillRect(rightX + c * cell, topY + r * cell, cell - 0.5, cell - 0.5);
+    }
+    if (scanPos >= 0) {
+      const r = Math.floor(scanPos / N), c = scanPos % N;
+      ctx.strokeStyle = cssVar('--series-8'); ctx.lineWidth = 2;
+      ctx.strokeRect(leftX + (c - 1) * cell, topY + (r - 1) * cell, cell * 3, cell * 3);
+      ctx.strokeStyle = cssVar('--series-1');
+      ctx.strokeRect(rightX + c * cell, topY + r * cell, cell, cell);
+    }
+  }
+  const btnRow = document.createElement('div'); btnRow.className = 'w-row';
+  const btns = {};
+  for (const name of Object.keys(kernels)) {
+    const b = document.createElement('button'); b.className = 'btn small ghost'; b.textContent = name;
+    b.onclick = () => { kname = name; computeAll(); revealed = N * N; scanPos = -1; paintBtns(); outText.innerHTML = describe(); render(); };
+    btns[name] = b; btnRow.append(b);
+  }
+  function paintBtns() { for (const [n, b] of Object.entries(btns)) { const on = n === kname; b.style.background = on ? cssVar('--series-4') : 'transparent'; b.style.color = on ? '#fff' : ''; b.style.borderColor = on ? cssVar('--series-4') : ''; } }
+  function describe() { return `Each output cell = the 3×3 filter multiplied against the patch under it, summed. Bright cells in the feature map = where <b>${kname.toLowerCase()}</b> matched.`; }
+  const scanRow = document.createElement('div'); scanRow.className = 'w-row';
+  const scanBtn = document.createElement('button'); scanBtn.className = 'btn small'; scanBtn.textContent = '▶ Watch it slide';
+  scanBtn.onclick = () => {
+    if (timer) { clearInterval(timer); timer = null; scanBtn.textContent = '▶ Watch it slide'; revealed = N * N; scanPos = -1; render(); return; }
+    computeAll(); revealed = 0; scanBtn.textContent = '⏸ Stop';
+    timer = setInterval(() => {
+      if (!canvas.isConnected) { clearInterval(timer); timer = null; return; }
+      scanPos = revealed; revealed++;
+      const r = Math.floor(scanPos / N), c = scanPos % N;
+      outText.innerHTML = `filter at row ${r}, col ${c} → activation <b>${out[r][c].toFixed(2)}</b>`;
+      render();
+      if (revealed >= N * N) { clearInterval(timer); timer = null; scanBtn.textContent = '▶ Watch it slide'; scanPos = -1; outText.innerHTML = describe(); render(); }
+    }, 22);
+  };
+  scanRow.append(scanBtn);
+  el.append(btnRow, canvas, scanRow, outText);
+  computeAll(); paintBtns(); outText.innerHTML = describe(); render();
+};
+
+// ---------- 11. Diffusion (denoise to image) ----------
+WIDGETS.diffusion = (el) => {
+  const N = 22, STEPS = 18;
+  function shape(name, x, y) {
+    const X = (x - 0.5) * 2.5, Y = (0.52 - y) * 2.5;
+    if (name === 'heart') { const f = Math.pow(X * X + Y * Y - 1, 3) - X * X * Y * Y * Y; return f <= 0; }
+    if (name === 'triangle') { return y > 0.28 && y < 0.8 && Math.abs(x - 0.5) < (y - 0.28) * 0.75; }
+    return Math.abs(Math.hypot(x - 0.5, y - 0.5) - 0.33) < 0.09; // ring
+  }
+  function targetGrid(name) {
+    const g = [];
+    for (let r = 0; r < N; r++) { g[r] = []; for (let c = 0; c < N; c++) g[r][c] = shape(name, (c + 0.5) / N, (r + 0.5) / N) ? 0.93 : 0.08; }
+    return g;
+  }
+  let tname = 'heart', target = targetGrid(tname), base = null, t = STEPS;
+  function newNoise() { base = []; for (let r = 0; r < N; r++) { base[r] = []; for (let c = 0; c < N; c++) base[r][c] = Math.random(); } }
+  newNoise();
+
+  const canvas = document.createElement('canvas');
+  const cell = 11, gs = N * cell, W = gs, H = gs, ctx = setupCanvas(canvas, W, H);
+  const outText = document.createElement('div'); outText.className = 'w-out';
+  let timer = null;
+
+  function render() {
+    const p = (STEPS - t) / STEPS;
+    ctx.clearRect(0, 0, W, H);
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      const v = target[r][c] * p + base[r][c] * (1 - p);
+      const g = Math.round(Math.max(0, Math.min(1, v)) * 255);
+      ctx.fillStyle = `rgb(${g},${g},${g})`;
+      ctx.fillRect(c * cell, r * cell, cell, cell);
+    }
+    const done = t === 0;
+    outText.innerHTML = `step <b>${STEPS - t}/${STEPS}</b> &nbsp;|&nbsp; noise ${Math.round((1 - p) * 100)}%` + (done ? ' &nbsp;<b>image emerged</b>' : '') + `<br><span style="color:${cssVar('--muted')}">prompt: a ${tname}. Each step removes a bit of noise, steered toward the prompt.</span>`;
+  }
+  const tRow = document.createElement('div'); tRow.className = 'w-row';
+  for (const [name, label] of [['heart', '❤ heart'], ['triangle', '▲ triangle'], ['ring', '◎ ring']]) {
+    const b = document.createElement('button'); b.className = 'btn small ghost'; b.textContent = label;
+    b.onclick = () => { tname = name; target = targetGrid(name); render(); };
+    tRow.append(b);
+  }
+  const row = document.createElement('div'); row.className = 'w-row';
+  const genBtn = document.createElement('button'); genBtn.className = 'btn small'; genBtn.textContent = '▶ Generate';
+  genBtn.onclick = () => {
+    if (timer) { clearInterval(timer); timer = null; genBtn.textContent = '▶ Generate'; return; }
+    if (t === 0) { newNoise(); t = STEPS; }
+    genBtn.textContent = '⏸ Pause';
+    timer = setInterval(() => {
+      if (!canvas.isConnected) { clearInterval(timer); timer = null; return; }
+      if (t > 0) t--;
+      render();
+      if (t === 0) { clearInterval(timer); timer = null; genBtn.textContent = '▶ Generate'; }
+    }, 130);
+  };
+  const stepBtn = document.createElement('button'); stepBtn.className = 'btn small ghost'; stepBtn.textContent = 'Denoise 1 step';
+  stepBtn.onclick = () => { if (t > 0) { t--; render(); } };
+  const resetBtn = document.createElement('button'); resetBtn.className = 'btn small ghost'; resetBtn.textContent = '🎲 New noise';
+  resetBtn.onclick = () => { if (timer) { clearInterval(timer); timer = null; genBtn.textContent = '▶ Generate'; } newNoise(); t = STEPS; render(); };
+  row.append(genBtn, stepBtn, resetBtn);
+  el.append(tRow, canvas, row, outText);
+  render();
+};
+
+// ---------- 12. Scaling law ----------
+WIDGETS.scaling = (el) => {
+  const Linf = 1.6, k = 6.0, alpha = 0.095;   // loss = Linf + k · C^(−alpha)
+  const loss = C => Linf + k * Math.pow(C, -alpha);
+  let logC = 3;                                 // log10 of compute, 0..8
+  const canvas = document.createElement('canvas');
+  const W = 620, H = 320, ctx = setupCanvas(canvas, W, H);
+  const out = document.createElement('div'); out.className = 'w-out';
+  const X0 = 0, X1 = 8, Y0 = 1.2, Y1 = 8;
+  const px = v => 46 + (v - X0) / (X1 - X0) * (W - 60);
+  const py = v => H - 34 - (v - Y0) / (Y1 - Y0) * (H - 54);
+
+  function render() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = cssVar('--surface-1'); ctx.fillRect(0, 0, W, H);
+    // floor
+    ctx.strokeStyle = cssVar('--baseline'); ctx.lineWidth = 1; ctx.setLineDash([5, 4]);
+    ctx.beginPath(); ctx.moveTo(px(X0), py(Linf)); ctx.lineTo(px(X1), py(Linf)); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = cssVar('--muted'); ctx.font = '11px system-ui'; ctx.textAlign = 'left';
+    ctx.fillText('irreducible floor L∞', px(X0) + 6, py(Linf) - 6);
+    // axes labels
+    ctx.fillText('loss', 8, 20);
+    ctx.textAlign = 'center';
+    for (let e = 0; e <= 8; e += 2) ctx.fillText('10^' + e, px(e), H - 14);
+    ctx.fillText('compute (FLOPs) →', W / 2, H - 2);
+    // curve
+    ctx.strokeStyle = cssVar('--series-10'); ctx.lineWidth = 2.5; ctx.beginPath();
+    for (let i = 0; i <= 200; i++) { const lc = X0 + (X1 - X0) * i / 200; const L = loss(Math.pow(10, lc)); i === 0 ? ctx.moveTo(px(lc), py(L)) : ctx.lineTo(px(lc), py(L)); }
+    ctx.stroke();
+    // point
+    const C = Math.pow(10, logC), L = loss(C);
+    ctx.fillStyle = cssVar('--series-8');
+    ctx.beginPath(); ctx.arc(px(logC), py(L), 7, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = cssVar('--surface-1'); ctx.lineWidth = 2; ctx.stroke();
+    // diminishing-returns readout: what does the next 10x buy?
+    const L2 = loss(Math.pow(10, Math.min(X1, logC + 1)));
+    const drop = L - L2;
+    out.innerHTML = `compute = <b>10^${logC.toFixed(1)}</b> FLOPs &nbsp;|&nbsp; loss = <b>${L.toFixed(3)}</b> &nbsp;|&nbsp; perplexity = e^loss = <b>${Math.exp(L).toFixed(1)}</b><br>` +
+      `<span style="color:${cssVar('--muted')}">the next 10× of compute buys only <b>−${drop.toFixed(3)}</b> loss — diminishing returns as you approach the floor (${Linf})</span>`;
+  }
+  el.append(canvas, slider('compute (log₁₀ FLOPs)', 0, 8, 0.1, logC, v => { logC = v; render(); }).row, out);
+  render();
+};
+
+// ---------- 13. RL agent (gridworld Q-learning) ----------
+WIDGETS.rlagent = (el) => {
+  const R = 6, C = 6;
+  const walls = new Set(['1,2', '2,2', '3,2', '1,4', '2,4', '4,4']);
+  const goal = '0,5', pit = '3,4', start = '5,0';
+  const key = (r, c) => r + ',' + c;
+  const isWall = (r, c) => r < 0 || r >= R || c < 0 || c >= C || walls.has(key(r, c));
+  const terminal = s => s === goal || s === pit;
+  const dr = [-1, 1, 0, 0], dc = [0, 0, -1, 1];   // up, down, left, right
+  const gamma = 0.92, alpha = 0.5;
+  let Q = {}, episode = 0, eps = 0.35, lastOutcome = '—', agent = null, timer = null, runTimer = null;
+  const getQ = s => (Q[s] || (Q[s] = [0, 0, 0, 0]));
+  const argmax = a => { let bi = 0; for (let i = 1; i < a.length; i++) if (a[i] > a[bi]) bi = i; return bi; };
+
+  function step(s, a) {
+    const [r, c] = s.split(',').map(Number);
+    let nr = r + dr[a], nc = c + dc[a];
+    if (isWall(nr, nc)) { nr = r; nc = c; }
+    const ns = key(nr, nc);
+    const rew = ns === goal ? 1 : ns === pit ? -1 : -0.02;
+    return { ns, rew };
+  }
+  function trainEpisodes(n) {
+    for (let e = 0; e < n; e++) {
+      let s = start, steps = 0;
+      while (!terminal(s) && steps < 80) {
+        const q = getQ(s);
+        const a = Math.random() < eps ? Math.floor(Math.random() * 4) : argmax(q);
+        const { ns, rew } = step(s, a);
+        const tgt = terminal(ns) ? rew : rew + gamma * Math.max(...getQ(ns));
+        q[a] += alpha * (tgt - q[a]);
+        s = ns; steps++;
+      }
+      episode++;
+      lastOutcome = s === goal ? 'reached goal 🎯' : s === pit ? 'fell in pit' : 'timed out';
+      eps = Math.max(0.05, eps * 0.995);
+    }
+  }
+
+  const canvas = document.createElement('canvas');
+  const cell = 46, gs = C * cell, W = gs, H = gs, ctx = setupCanvas(canvas, W, H);
+  const out = document.createElement('div'); out.className = 'w-out';
+
+  function valColor(v) {
+    const t = Math.max(-1, Math.min(1, v));
+    if (t >= 0) return `rgba(12,163,12,${0.10 + 0.55 * t})`;
+    return `rgba(208,59,59,${0.10 + 0.55 * (-t)})`;
+  }
+  function arrow(r, c, a) {
+    const cx = c * cell + cell / 2, cy = r * cell + cell / 2, L = 11;
+    const ex = cx + dc[a] * L, ey = cy + dr[a] * L;
+    ctx.strokeStyle = cssVar('--ink-2'); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(cx - dc[a] * L, cy - dr[a] * L); ctx.lineTo(ex, ey); ctx.stroke();
+    ctx.fillStyle = cssVar('--ink-2');
+    ctx.beginPath(); ctx.arc(ex, ey, 3.2, 0, Math.PI * 2); ctx.fill();
+  }
+  function render() {
+    ctx.clearRect(0, 0, W, H);
+    for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+      const s = key(r, c);
+      ctx.fillStyle = cssVar('--surface-1'); ctx.fillRect(c * cell, r * cell, cell, cell);
+      if (isWall(r, c)) { ctx.fillStyle = cssVar('--ink-2'); ctx.fillRect(c * cell, r * cell, cell, cell); }
+      else if (!terminal(s)) { const q = Q[s]; if (q) { ctx.fillStyle = valColor(Math.max(...q)); ctx.fillRect(c * cell, r * cell, cell, cell); } }
+      ctx.strokeStyle = cssVar('--grid'); ctx.lineWidth = 1; ctx.strokeRect(c * cell, r * cell, cell, cell);
+      if (!isWall(r, c) && !terminal(s) && Q[s] && Math.max(...Q[s].map(Math.abs)) > 0.001) arrow(r, c, argmax(Q[s]));
+    }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '600 20px system-ui';
+    const gp = goal.split(',').map(Number), pp = pit.split(',').map(Number);
+    ctx.fillStyle = cssVar('--good'); ctx.fillText('★', gp[1] * cell + cell / 2, gp[0] * cell + cell / 2);
+    ctx.fillStyle = cssVar('--bad'); ctx.fillText('✕', pp[1] * cell + cell / 2, pp[0] * cell + cell / 2);
+    ctx.textBaseline = 'alphabetic';
+    if (agent) {
+      const [r, c] = agent.split(',').map(Number);
+      ctx.fillStyle = cssVar('--series-1');
+      ctx.beginPath(); ctx.arc(c * cell + cell / 2, r * cell + cell / 2, 12, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = cssVar('--surface-1'); ctx.lineWidth = 2.5; ctx.stroke();
+    }
+    out.innerHTML = `episodes trained: <b>${episode}</b> &nbsp;|&nbsp; exploration ε = <b>${eps.toFixed(2)}</b> &nbsp;|&nbsp; last: ${lastOutcome}<br>` +
+      `<span style="color:${cssVar('--muted')}">green = states the agent learned are valuable · arrows = its chosen action · it learns purely from reward (★ +1, ✕ −1), never told the right move</span>`;
+  }
+  function runGreedy() {
+    if (runTimer) { clearInterval(runTimer); runTimer = null; }
+    agent = start; let steps = 0;
+    runTimer = setInterval(() => {
+      if (!canvas.isConnected) { clearInterval(runTimer); runTimer = null; return; }
+      render();
+      if (terminal(agent) || steps++ > 40) { clearInterval(runTimer); runTimer = null; return; }
+      const q = Q[agent]; if (!q) { clearInterval(runTimer); runTimer = null; return; }
+      agent = step(agent, argmax(q)).ns;
+    }, 180);
+  }
+
+  const row = document.createElement('div'); row.className = 'w-row';
+  const trainBtn = document.createElement('button'); trainBtn.className = 'btn small'; trainBtn.textContent = '▶ Train';
+  trainBtn.onclick = () => {
+    if (timer) { clearInterval(timer); timer = null; trainBtn.textContent = '▶ Train'; return; }
+    trainBtn.textContent = '⏸ Pause';
+    timer = setInterval(() => {
+      if (!canvas.isConnected) { clearInterval(timer); timer = null; return; }
+      trainEpisodes(15); render();
+      if (episode >= 4000) { clearInterval(timer); timer = null; trainBtn.textContent = '▶ Train'; }
+    }, 60);
+  };
+  const runBtn = document.createElement('button'); runBtn.className = 'btn small ghost'; runBtn.textContent = '🏃 Run agent';
+  runBtn.onclick = runGreedy;
+  const resetBtn = document.createElement('button'); resetBtn.className = 'btn small ghost'; resetBtn.textContent = 'Reset';
+  resetBtn.onclick = () => { if (timer) { clearInterval(timer); timer = null; trainBtn.textContent = '▶ Train'; } if (runTimer) { clearInterval(runTimer); runTimer = null; } Q = {}; episode = 0; eps = 0.35; lastOutcome = '—'; agent = null; render(); };
+  row.append(trainBtn, runBtn, resetBtn);
+  el.append(canvas, row, out);
+  render();
+};
