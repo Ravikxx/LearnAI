@@ -15,9 +15,9 @@ COURSES.push({
       minutes: 12,
       steps: [
         { t: 'text', title: 'Naming the number training minimizes', md: `
-          <p>You know training minimizes a "loss." For a language model, that loss has an exact name and formula: <strong>cross-entropy</strong>, the average negative log-probability the model assigned to the tokens that actually occurred.</p>
+          <p>Training minimizes a "loss." For a language model, that loss has an exact name: <strong>cross-entropy</strong> — the average negative log-probability the model assigned to the tokens that actually occurred.</p>
           <pre><code>L = &minus;(1/N) &Sigma; log p(x&#7522; | x&#8321; ... x&#7522;&#8331;&#8321;)</code></pre>
-          <p>Read it plainly: for each of N tokens, look at the probability the model gave to the <em>correct</em> next token, take its log, negate it, average. If the model is certain and right, p &asymp; 1, log p &asymp; 0, loss &asymp; 0. If it confidently assigns a low probability to what actually came next, log p is a large negative number, so the loss is large. The model is punished precisely for being confidently wrong.</p>` },
+          <p>For each of N tokens, take the log of the probability the model gave the <em>correct</em> next token, negate it, average. Certain and right (p &asymp; 1) costs almost nothing. Confidently wrong (p near 0) costs a lot — the model is punished precisely for that.</p>` },
         { t: 'quiz',
           q: 'The cross-entropy loss for one token is &minus;log p(correct token). Why does confidently assigning low probability to the right token hurt so much more than being merely uncertain?',
           opts: [
@@ -27,11 +27,21 @@ COURSES.push({
           ],
           a: 1,
           why: 'The logarithm is the whole point. &minus;log(0.5) &asymp; 0.69, &minus;log(0.01) &asymp; 4.6, &minus;log(0.001) &asymp; 6.9 — the penalty explodes as your probability on the truth approaches zero. This is what pressures the model toward calibrated confidence: being sure and wrong is catastrophic for the loss.' },
+        { t: 'widget', name: 'classify', title: 'Try it: low loss or high loss?', buckets: ['Low loss', 'High loss'], items: [
+          ['Model assigns p = 0.95 to the correct next token', 0],
+          ['Model assigns p = 0.02 to the correct next token', 1],
+          ['Perplexity of 1.2 on a passage', 0],
+          ['Perplexity of 180 on a passage', 1],
+          ['Confidently predicts the wrong word (p = 0.001 on the truth)', 1],
+          ['Correctly predicts an easy, common word with p = 0.9', 0],
+          ['Perplexity of 6 on a passage', 0],
+          ['Model is dead certain about the wrong continuation', 1],
+        ], md: `<p>Sort each scenario by whether it costs the model a little or a lot. Remember: it\'s not being wrong that\'s expensive — it\'s being <em>confidently</em> wrong.</p>` },
         { t: 'text', title: 'Perplexity: the loss in human units', md: `
-          <p>Cross-entropy is in nats (or bits), which is hard to feel. So people exponentiate it into <strong>perplexity</strong>:</p>
+          <p>Cross-entropy is measured in nats, which is hard to feel. So people exponentiate it into <strong>perplexity</strong>:</p>
           <pre><code>perplexity = e<sup>L</sup>   (or 2<sup>L</sup> if L is in bits)</code></pre>
-          <p>Perplexity is the model\'s effective "number of equally-likely choices" at each step. A perplexity of 1 means perfect certainty (it always knew the next token). A perplexity of 100 means the model is as confused as if it were guessing uniformly among 100 options. Early GPT-2 sat around perplexity 20&ndash;35 on benchmark text; strong modern models are far lower. It is the same loss you have known since Foundations — just made legible.</p>
-          <div class="callout">💡 Every capability an LLM has — grammar, facts, reasoning, code — is a side effect of driving this one number down across trillions of tokens. There is no separate "reasoning objective." Compress text well enough and reasoning falls out.</div>` },
+          <p>Perplexity is the model\'s effective "number of equally-likely choices" per step. Perplexity 1 = perfect certainty. Perplexity 100 = as confused as guessing uniformly among 100 options. Early GPT-2 sat around 20&ndash;35; strong modern models are far lower.</p>
+          <div class="callout">💡 Every LLM capability — grammar, facts, reasoning, code — is a side effect of driving this one number down across trillions of tokens. There is no separate "reasoning objective." Compress text well enough and reasoning falls out.</div>` },
         { t: 'quiz',
           q: 'A model reports a per-token perplexity of about 8 on some text. What does that mean intuitively?',
           opts: [
@@ -49,9 +59,9 @@ COURSES.push({
       minutes: 13,
       steps: [
         { t: 'text', title: 'Loss is a predictable function of scale', md: `
-          <p>Here is one of the most consequential empirical discoveries in AI. Plot a model\'s loss against the scale you train it at — parameters <code>N</code>, data <code>D</code>, or compute <code>C</code> — on log-log axes, and you get a <strong>straight line</strong> over many orders of magnitude. The loss follows a <strong>power law</strong>:</p>
+          <p>Plot a model\'s loss against the scale you train it at — parameters <code>N</code>, data <code>D</code>, or compute <code>C</code> — on log-log axes, and you get a <strong>straight line</strong> across many orders of magnitude. The loss follows a <strong>power law</strong>:</p>
           <pre><code>L(C) &asymp; L&#8734; + (C&#8320; / C)<sup>&alpha;</sup></code></pre>
-          <p>where <code>L&#8734;</code> is an irreducible floor (the true entropy of language you can never beat) and the exponent <code>&alpha;</code> is small — around 0.05. Small exponent, but it holds across a <em>trillion-fold</em> range of compute. This is why labs can spend hundreds of millions of dollars on a training run with confidence: they fit the curve on small models and <strong>extrapolate</strong> the loss of the giant one before building it.</p>` },
+          <p><code>L&#8734;</code> is an irreducible floor (language\'s true entropy); <code>&alpha;</code> is small, around 0.05, yet holds across a <em>trillion-fold</em> range of compute. That predictability is why labs commit hundreds of millions of dollars to a training run: fit the curve on small models, then <strong>extrapolate</strong> the loss of the giant one before building it.</p>` },
         { t: 'quiz',
           q: 'Why are scaling laws so strategically important to the labs building frontier models?',
           opts: [
@@ -64,8 +74,8 @@ COURSES.push({
         { t: 'widget', name: 'scaling', title: 'Try it: ride the power law', md: `
           <p>Drag the compute slider and watch the loss follow the curve. Notice two things: it never reaches zero (the dashed floor L∞), and every 10× of compute buys a smaller and smaller loss reduction — the diminishing returns that shape every training-budget decision.</p>` },
         { t: 'text', title: 'Chinchilla: how to spend a compute budget', md: `
-          <p>Given a fixed compute budget, should you build a <em>bigger</em> model or train on <em>more data</em>? DeepMind\'s 2022 "Chinchilla" result answered it: for compute-optimal training, parameters and training tokens should scale <strong>together, in roughly equal proportion</strong> — about <code>20</code> training tokens per parameter.</p>
-          <p>This overturned earlier practice. GPT-3 (175B params) was, by this rule, badly <em>under-trained</em> — too big for its data. Chinchilla (70B params) used the same compute but far more data, and beat it. The lesson reshaped the field: for years after, "smaller model, way more tokens" became the winning recipe.</p>
+          <p>Given a fixed compute budget, bigger model or more data? DeepMind\'s 2022 "Chinchilla" result: for compute-optimal training, parameters and training tokens should scale <strong>together</strong>, in roughly equal proportion — about <code>20</code> tokens per parameter.</p>
+          <p>This overturned earlier practice. GPT-3 (175B params) was, by this rule, badly <em>under-trained</em> — too big for its data. Chinchilla (70B params), same compute, far more data, beat it. "Smaller model, way more tokens" became the winning recipe for years after.</p>
           <pre><code>compute-optimal:  D &asymp; 20 &middot; N       (tokens &asymp; 20 &times; parameters)</code></pre>` },
         { t: 'quiz',
           q: 'Chinchilla showed GPT-3 was "under-trained." In scaling-law terms, what does that mean?',
@@ -77,9 +87,9 @@ COURSES.push({
           a: 1,
           why: 'Under-trained here means over-parameterized relative to data: the compute was spent on size instead of tokens. The compute-optimal frontier (~20 tokens/param) said a smaller model fed more data reaches a lower loss for the same cost — exactly what Chinchilla demonstrated against GPT-3.' },
         { t: 'text', title: 'The 6ND rule', md: `
-          <p>One more number ties scale to cost. The compute to train a dense Transformer is captured by a famous approximation:</p>
+          <p>One more number ties scale to cost:</p>
           <pre><code>training FLOPs &asymp; 6 &middot; N &middot; D</code></pre>
-          <p>N parameters, D training tokens. The 6 comes from roughly 2 FLOPs per parameter for the forward pass and 4 for the backward pass, per token. So compute scales with the <em>product</em> of model size and data — double both and you quadruple the bill. Combine this with Chinchilla (<code>D &asymp; 20N</code>) and you can estimate, on a napkin, the FLOPs behind any frontier model — and therefore its rough dollar and energy cost.</p>` },
+          <p>N parameters, D training tokens — the 6 comes from ~2 FLOPs/parameter forward, 4 backward, per token. Compute scales with the <em>product</em> of model size and data — double both and you quadruple the bill. Combine with Chinchilla (<code>D &asymp; 20N</code>) and you can napkin-estimate the FLOPs, dollars, and energy behind any frontier model.</p>` },
         { t: 'quiz',
           q: 'Using FLOPs &asymp; 6ND, if you double the parameter count AND double the training tokens, training compute goes up by what factor?',
           opts: [
@@ -97,8 +107,8 @@ COURSES.push({
       minutes: 10,
       steps: [
         { t: 'text', title: 'Smooth loss, jumpy skills', md: `
-          <p>Scaling laws say the loss falls <em>smoothly</em>. Yet specific abilities — multi-step arithmetic, following complex instructions, in-context learning — often appear <strong>suddenly</strong>: near-zero at small scale, then rapidly useful past some threshold. These are called <strong>emergent abilities</strong>, and they create the strange gap between a smoothly-improving loss and lurching, unpredictable capabilities.</p>
-          <p>Why the mismatch? A capability like "add two 3-digit numbers" is often measured by a harsh metric: exact-match, all-or-nothing. The model can be steadily getting each digit more probable (smooth loss improvement) while scoring <em>zero</em> on exact-match until <em>every</em> digit crosses the line at once — at which point the score snaps from 0 to high. The underlying skill grew gradually; the <em>metric</em> made it look like a jump.</p>` },
+          <p>Scaling laws say the loss falls <em>smoothly</em>. Yet specific abilities — multi-step arithmetic, following complex instructions, in-context learning — often appear <strong>suddenly</strong>: near-zero at small scale, then rapidly useful past some threshold. These are <strong>emergent abilities</strong>, and they create a gap between a smoothly-improving loss and lurching, unpredictable capabilities.</p>
+          <p>Why the mismatch? A skill like "add two 3-digit numbers" is often scored all-or-nothing (exact-match). The model can steadily get each digit more probable (smooth loss) while scoring <em>zero</em> until <em>every</em> digit crosses the line at once — then the score snaps from 0 to high. The skill grew gradually; the <em>metric</em> made it look like a jump.</p>` },
         { t: 'quiz',
           q: 'A model\'s loss improves smoothly with scale, but its accuracy on 3-digit addition stays at 0% then suddenly jumps to 80%. What is a leading explanation?',
           opts: [
@@ -108,9 +118,19 @@ COURSES.push({
           ],
           a: 1,
           why: 'Much apparent "emergence" is partly a measurement artifact: strict metrics (exact match) hide gradual gains until they cross a threshold together. The smooth-loss/jumpy-skill gap is real and important for forecasting — but it does not mean the physics changed, and choosing a smoother metric often reveals continuous improvement underneath.' },
+        { t: 'widget', name: 'classify', title: 'Try it: smooth or emergent?', buckets: ['Scales smoothly with compute', 'Appears to jump suddenly'], items: [
+          ['Cross-entropy loss on held-out text', 0],
+          ['Perplexity', 0],
+          ['Exact-match accuracy on 3-digit addition', 1],
+          ['Passing a multi-step logic puzzle', 1],
+          ['Next-token prediction accuracy on frequent words', 0],
+          ['Sudden competence at following complex, multi-part instructions', 1],
+          ['Average log-probability assigned to the correct token', 0],
+          ['In-context learning of a brand-new task format', 1],
+        ], md: `<p>Sort each metric or skill by how it typically behaves as you scale up a model.</p>` },
         { t: 'text', title: 'Why this makes frontier AI hard to predict', md: `
-          <p>Here is the uncomfortable synthesis. Scaling laws let you predict the <em>loss</em> of the next model with remarkable accuracy. They do <em>not</em> reliably predict which <em>capabilities</em> that lower loss will unlock. You can forecast the number; you cannot fully forecast what the model will be able to do.</p>
-          <p>That gap is central to both the excitement and the risk around scaling. It is why labs run extensive evaluations after training rather than relying on theory, and why the AI Safety course\'s concerns are sharpened by scale: a system whose capabilities arrive partly by surprise is intrinsically harder to make safe in advance.</p>` },
+          <p>Here is the uncomfortable synthesis. Scaling laws predict the <em>loss</em> of the next model with remarkable accuracy. They do <em>not</em> reliably predict which <em>capabilities</em> that lower loss will unlock. You can forecast the number; you cannot fully forecast what the model will be able to do.</p>
+          <p>That gap is central to both the excitement and the risk around scaling — why labs run extensive evaluations after training rather than trusting theory, and why capabilities that arrive partly by surprise are intrinsically harder to make safe in advance.</p>` },
         { t: 'quiz',
           q: 'What can scaling laws predict well, and what can they not?',
           opts: [
@@ -130,9 +150,9 @@ COURSES.push({
         { t: 'text', title: 'Three objectives, three stages', md: `
           <p>You met pretrain &rarr; fine-tune &rarr; RLHF as a story. Now see it as three <em>different optimization objectives</em> stacked on the same weights:</p>
           <ol>
-            <li><strong>Pretraining</strong> — minimize cross-entropy (next-token prediction) over a web-scale corpus. This is where knowledge and raw capability come from. 99%+ of the compute lives here.</li>
-            <li><strong>Supervised fine-tuning (SFT)</strong> — same cross-entropy loss, but on a small, curated set of high-quality <em>instruction &rarr; response</em> demonstrations. This teaches the assistant format, not new knowledge.</li>
-            <li><strong>Preference optimization (RLHF)</strong> — a different objective entirely, driven by human preference rather than imitation. The subject of the next steps.</li>
+            <li><strong>Pretraining</strong> — minimize cross-entropy over a web-scale corpus. Knowledge and raw capability come from here; 99%+ of the compute lives here.</li>
+            <li><strong>Supervised fine-tuning (SFT)</strong> — same loss, on a small, curated set of <em>instruction &rarr; response</em> demonstrations. Teaches format, not new knowledge.</li>
+            <li><strong>Preference optimization (RLHF)</strong> — a different objective, driven by human preference rather than imitation.</li>
           </ol>
           <p>Same network throughout; what changes is the loss you point at it.</p>` },
         { t: 'quiz',
@@ -144,10 +164,17 @@ COURSES.push({
           ],
           a: 1,
           why: 'Pretraining is the giant: trillions of tokens, months of GPUs. SFT and RLHF are comparatively tiny — thousands to millions of curated examples that reshape behavior, not rebuild knowledge. Capability is mostly bought in pretraining; alignment is a thin, crucial layer on top.' },
+        { t: 'widget', name: 'order', title: 'Try it: order the alignment pipeline', items: [
+          'Pretrain on a web-scale corpus with next-token prediction (cross-entropy)',
+          'Supervised fine-tuning on curated instruction → response demonstrations',
+          'Collect human rankings between pairs of candidate responses',
+          'Train a reward model to predict those human preferences',
+          'Optimize the policy to maximize reward, leashed by a KL penalty to the reference model',
+        ], md: `<p>Same weights, three stages, three objectives. Click these into the order a frontier model actually passes through them.</p>` },
         { t: 'text', title: 'The RLHF objective, written out', md: `
-          <p>RLHF replaces "imitate this answer" with "produce answers humans prefer." Concretely: humans rank pairs of responses, a <strong>reward model</strong> <code>r(x, y)</code> is trained to predict those preferences, and then the language model (the policy <code>&pi;</code>) is optimized to maximize reward — with a leash:</p>
+          <p>RLHF replaces "imitate this answer" with "produce answers humans prefer." Humans rank pairs of responses, a <strong>reward model</strong> <code>r(x, y)</code> learns to predict those preferences, and the language model (the policy <code>&pi;</code>) is optimized to maximize reward — with a leash:</p>
           <pre><code>maximize  E[ r(x, y) ] &minus; &beta; &middot; KL( &pi; &#8214; &pi;<sub>ref</sub> )</code></pre>
-          <p>The first term pushes toward high-reward answers. The second — a <strong>KL-divergence penalty</strong> — punishes drifting too far from the original fine-tuned model <code>&pi;<sub>ref</sub></code>. Without that leash, the policy would chase the reward model into bizarre, degenerate text that scores high but is gibberish — a textbook case of the reward hacking you met in AI Safety. The coefficient <code>&beta;</code> sets how tight the leash is.</p>` },
+          <p>The first term chases high-reward answers. The <strong>KL-divergence penalty</strong> punishes drifting too far from the original fine-tuned model <code>&pi;<sub>ref</sub></code>. Without it, the policy would chase the reward model into bizarre, high-scoring gibberish — reward hacking, from AI Safety. <code>&beta;</code> sets how tight the leash is.</p>` },
         { t: 'quiz',
           q: 'In the RLHF objective, what is the job of the KL-divergence penalty term?',
           opts: [
@@ -158,8 +185,8 @@ COURSES.push({
           a: 1,
           why: 'The KL term is a leash against reward hacking. The reward model is an imperfect proxy for human preference; chase it too hard and you exploit its flaws. Penalizing divergence from &pi;<sub>ref</sub> keeps outputs in the space of sensible language while still nudging toward preferred answers — proxy-optimization done carefully.' },
         { t: 'text', title: 'Why the leash is the whole game', md: `
-          <p>Step back and notice the pattern that has run through every course. The reward model is a <em>proxy</em> for "what humans actually want." Optimizing a proxy without restraint produces Goodhart\'s law in action: the measure gets maxed, the goal gets missed. The <code>&beta; &middot; KL</code> leash is an explicit, mathematical acknowledgment that we do not trust our own objective — so we deliberately optimize it only partway.</p>
-          <p>That is the alignment problem, made concrete and shipped in production. Newer methods (like DPO) reformulate the math to skip the separate reward model, but the core tension — optimize human preference without over-optimizing an imperfect proxy — is exactly the same.</p>` },
+          <p>The reward model is a <em>proxy</em> for "what humans actually want." Optimize a proxy without restraint and you get Goodhart\'s law: the measure gets maxed, the goal gets missed. The <code>&beta; &middot; KL</code> leash is a mathematical admission that we don\'t fully trust our own objective — so we deliberately optimize it only partway.</p>
+          <p>That is the alignment problem, shipped in production. Newer methods (like DPO) skip the separate reward model, but the core tension — optimize preference without over-optimizing an imperfect proxy — is the same.</p>` },
         { t: 'quiz',
           q: 'How does the RLHF objective concretely embody the alignment problem from the AI Safety course?',
           opts: [
@@ -177,9 +204,9 @@ COURSES.push({
       minutes: 12,
       steps: [
         { t: 'text', title: 'Why attention gets expensive fast', md: `
-          <p>Attention lets every token look at every other token — its superpower and its cost. With a sequence of <code>n</code> tokens, that is <code>n &times; n</code> pairwise comparisons:</p>
+          <p>Attention lets every token look at every other token — its superpower and its cost. With <code>n</code> tokens, that\'s <code>n &times; n</code> pairwise comparisons:</p>
           <pre><code>attention cost &prop; n<sup>2</sup></code></pre>
-          <p>Double the context length and you roughly <em>quadruple</em> the attention compute and memory. This quadratic wall is why long context windows were historically so hard and expensive, and why a whole research industry exists to approximate attention more cheaply (FlashAttention, sparse and linear attention, and so on). When a provider charges more for long-context requests, this <code>n<sup>2</sup></code> is a big part of why.</p>` },
+          <p>Double the context length and you roughly <em>quadruple</em> the attention compute and memory. That quadratic wall is why long context windows were historically expensive, and why FlashAttention, sparse attention, and linear attention exist — approximating attention more cheaply.</p>` },
         { t: 'quiz',
           q: 'Standard self-attention scales as n&sup2; in the sequence length n. Going from 2,000 to 8,000 tokens of context multiplies attention cost by roughly what?',
           opts: [
@@ -190,8 +217,8 @@ COURSES.push({
           a: 1,
           why: '4&times; the length, squared, is 16&times; the attention compute and memory. That quadratic scaling is the fundamental reason long context is costly and why so much engineering targets making attention sub-quadratic. It is a direct, quantitative consequence of "every token attends to every token."' },
         { t: 'text', title: 'Training cost vs inference cost', md: `
-          <p>A crucial distinction the 6ND rule hides: training is a one-time megaproject, but <strong>inference</strong> — running the model to serve users — is forever. A model used by hundreds of millions of people can, over its lifetime, consume far more total compute serving answers than it did to train.</p>
-          <p>Inference has its own bottleneck: the <strong>KV cache</strong>. To generate each new token, a model reuses the keys and values of all previous tokens (so it does not recompute them). That cache grows linearly with the sequence length and must live in fast GPU memory. For long conversations and many simultaneous users, KV-cache memory — not raw math — is often what limits how much a single GPU can serve.</p>` },
+          <p>Training is a one-time megaproject; <strong>inference</strong> — serving users — is forever. A model used by hundreds of millions of people can, over its lifetime, burn far more total compute serving answers than it did to train.</p>
+          <p>Inference\'s own bottleneck is the <strong>KV cache</strong>: to generate each new token, the model reuses the keys and values of all previous tokens rather than recomputing them. That cache grows linearly with sequence length and must live in fast GPU memory. For long conversations and many simultaneous users, KV-cache memory — not raw math — is often the real limit on what a GPU can serve.</p>` },
         { t: 'quiz',
           q: 'During generation, why does a long conversation strain GPU memory even between the bursts of computation?',
           opts: [
@@ -202,8 +229,8 @@ COURSES.push({
           a: 1,
           why: 'The KV cache is the hidden memory cost of inference. It lets the model avoid recomputing past tokens, but it scales with context length &times; concurrent users and lives in scarce GPU RAM. That is frequently the true limit on serving capacity — a systems constraint invisible from the model\'s accuracy alone.' },
         { t: 'text', title: 'Why one GPU is never enough', md: `
-          <p>Frontier models do not fit on a single GPU — not the weights, not the activations, not the optimizer state. So training and serving are spread across thousands of chips using several kinds of <strong>parallelism</strong>: splitting the data across GPUs, splitting individual layers across GPUs (tensor parallelism), and splitting the stack of layers across GPUs (pipeline parallelism). Orchestrating this — keeping thousands of chips fed and synchronized over a fast interconnect — is as much of the achievement as the model design itself.</p>
-          <div class="callout">💡 The synthesis: a modern model\'s capability is bounded not only by ideas but by three physical resources — compute (FLOPs), memory (for weights and the KV cache), and interconnect bandwidth. Scaling laws set the target; hardware decides what is reachable.</div>` },
+          <p>Frontier models do not fit on a single GPU — not the weights, activations, or optimizer state. So training and serving spread across thousands of chips via <strong>parallelism</strong>: splitting data across GPUs, splitting individual layers across GPUs (tensor parallelism), and splitting the stack of layers across GPUs (pipeline parallelism). Keeping thousands of chips fed and synced over a fast interconnect is as much the achievement as the model design.</p>
+          <div class="callout">💡 The synthesis: capability is bounded not only by ideas but by three physical resources — compute (FLOPs), memory (weights + KV cache), and interconnect bandwidth. Scaling laws set the target; hardware decides what\'s reachable.</div>` },
         { t: 'quiz',
           q: 'Why must frontier models be split across many GPUs rather than run on one big one?',
           opts: [
@@ -213,6 +240,16 @@ COURSES.push({
           ],
           a: 1,
           why: 'It is a capacity problem: the model and its training state exceed any single device\'s memory and throughput. Parallelism partitions the work across thousands of GPUs, and coordinating them over a fast interconnect is a core engineering feat — hardware and systems are inseparable from the model.' },
+        { t: 'widget', name: 'classify', title: 'Try it: compute-bound or memory-bound?', buckets: ['Compute-bound (FLOPs-limited)', 'Memory-bound (capacity/bandwidth-limited)'], items: [
+          ['Attention cost quadrupling when context length doubles', 0],
+          ['Storing the KV cache for many long, simultaneous conversations', 1],
+          ['The raw forward + backward FLOPs per training token', 0],
+          ["Fitting a model's weights and optimizer state on one GPU", 1],
+          ['Estimating training cost with the 6ND rule', 0],
+          ['Serving many concurrent users with long contexts on one GPU', 1],
+          ['A huge matrix multiply split via tensor parallelism', 0],
+          ["Splitting layers across GPUs because they don't fit in one device's memory (pipeline parallelism)", 1],
+        ], md: `<p>Every systems headache in this lesson is one of two flavors. Sort each scenario by the resource that actually limits it.</p>` },
       ],
     },
     {
@@ -221,15 +258,15 @@ COURSES.push({
       minutes: 11,
       steps: [
         { t: 'text', title: 'A product is many models in a trench coat', md: `
-          <p>A real AI product is rarely one model. It is a <em>system</em> that orchestrates several of the types from the survey course, each doing what it is best at. A customer-support assistant, for example, might chain:</p>
+          <p>A real AI product is rarely one model — it\'s a <em>system</em> that orchestrates several types, each doing what it\'s best at. A customer-support assistant might chain:</p>
           <ol>
-            <li><strong>Embedding model</strong> &rarr; turn the user\'s question and the knowledge base into vectors (retrieval).</li>
+            <li><strong>Embedding model</strong> &rarr; turn the question and knowledge base into vectors (retrieval).</li>
             <li><strong>Vector search</strong> &rarr; pull the most relevant documents (RAG).</li>
             <li><strong>LLM</strong> &rarr; answer, grounded in those documents.</li>
             <li><strong>Tools/agents</strong> &rarr; call an API to check an order status if needed.</li>
             <li><strong>A smaller classifier</strong> &rarr; detect and refuse abusive or out-of-scope requests (a guardrail).</li>
           </ol>
-          <p>Every course you took maps onto one link in this chain. The engineering skill is choosing the right model type for each job and wiring them together.</p>` },
+          <p>Every course you took maps onto one link in this chain — the skill is choosing the right type for each job and wiring them together.</p>` },
         { t: 'quiz',
           q: 'Why build a support bot from an embedding model + retrieval + an LLM + a classifier, instead of just one big LLM?',
           opts: [
@@ -239,14 +276,21 @@ COURSES.push({
           ],
           a: 1,
           why: 'Specialization wins. RAG grounds the LLM in real, up-to-date documents (addressing the frozen-knowledge and hallucination problems); cheap models handle bulk retrieval and guardrails. The result is more accurate, cheaper per query, and easier to control than forcing one giant model to do everything.' },
+        { t: 'widget', name: 'match', title: 'Try it: match the component to its job', pairs: [
+          ['Embedding model', 'Turns text into vectors for retrieval'],
+          ['Vector search / RAG', 'Finds the most relevant documents'],
+          ['LLM', 'Generates an answer grounded in retrieved documents'],
+          ['Tool/agent call', "Checks an order's status via an API"],
+          ['Small classifier', 'Flags abusive or out-of-scope requests'],
+        ], md: `<p>A support bot is five components in a trench coat. Pair each one with the job it actually does.</p>` },
         { t: 'text', title: 'The three-way trade-off', md: `
-          <p>Every design decision in such a system is a negotiation between three quantities pulling against each other:</p>
+          <p>Every design decision is a negotiation between three quantities pulling against each other:</p>
           <ul>
-            <li><strong>Quality</strong> — how good the answers are (bigger models, more retrieval, more reasoning steps).</li>
-            <li><strong>Latency</strong> — how fast it responds (users abandon slow apps; each extra model call and each reasoning token adds delay).</li>
-            <li><strong>Cost</strong> — dollars per request (bigger models and longer contexts cost more, per the <code>n<sup>2</sup></code> and per-token economics you just saw).</li>
+            <li><strong>Quality</strong> — bigger models, more retrieval, more reasoning steps.</li>
+            <li><strong>Latency</strong> — users abandon slow apps; each extra model call and reasoning token adds delay.</li>
+            <li><strong>Cost</strong> — dollars per request (bigger models, longer contexts — the <code>n<sup>2</sup></code> economics you just saw).</li>
           </ul>
-          <p>You cannot maximize all three. A common resolution is <strong>cascading</strong> or <strong>routing</strong>: send easy queries to a small, fast, cheap model and escalate only the hard ones to the expensive frontier model — buying most of the quality at a fraction of the average cost and latency.</p>` },
+          <p>You can\'t maximize all three. A common resolution is <strong>cascading</strong> or <strong>routing</strong>: send easy queries to a small, cheap model and escalate only the hard ones — buying most of the quality at a fraction of the average cost and latency.</p>` },
         { t: 'quiz',
           q: 'A team routes simple queries to a small cheap model and only escalates hard ones to a large model. Which trade-off are they managing?',
           opts: [
@@ -264,13 +308,13 @@ COURSES.push({
       minutes: 11,
       steps: [
         { t: 'text', title: 'Where the smooth curves might bend', md: `
-          <p>Scaling has carried the field a long way, but every input to the <code>6ND</code> engine faces a ceiling:</p>
+          <p>Scaling has carried the field far, but every input to the <code>6ND</code> engine faces a ceiling:</p>
           <ul>
-            <li><strong>Data.</strong> Chinchilla wants ~20 tokens per parameter, and frontier models are approaching the supply of high-quality human text on the internet. This "data wall" is driving intense work on synthetic data, multimodal data, and squeezing more from each token.</li>
-            <li><strong>Compute &amp; energy.</strong> Each tier costs multiplicatively more (the 6ND product). At some point the dollars, chips, and gigawatts become the binding constraint, not the algorithm.</li>
-            <li><strong>Diminishing returns.</strong> The small exponent <code>&alpha;</code> in the power law cuts both ways: past a point, each 10&times; of compute buys a smaller and smaller loss reduction.</li>
+            <li><strong>Data.</strong> Chinchilla wants ~20 tokens/parameter, and frontier models are approaching the supply of high-quality human text online — the "data wall" driving work on synthetic and multimodal data.</li>
+            <li><strong>Compute &amp; energy.</strong> Each tier costs multiplicatively more (the 6ND product); eventually dollars, chips, and gigawatts bind, not the algorithm.</li>
+            <li><strong>Diminishing returns.</strong> The small exponent <code>&alpha;</code> cuts both ways: past a point, each 10&times; of compute buys a smaller loss reduction.</li>
           </ul>
-          <p>Whether raw scaling keeps paying off, or new ideas (better architectures, reasoning at inference time, agents) take over, is the central open question of the field right now.</p>` },
+          <p>Whether raw scaling keeps paying off, or new ideas (architectures, inference-time reasoning, agents) take over, is the open question right now.</p>` },
         { t: 'quiz',
           q: 'The "data wall" is a limit on continued scaling. Why does it follow directly from the Chinchilla result?',
           opts: [
@@ -281,14 +325,14 @@ COURSES.push({
           a: 1,
           why: 'Chinchilla couples data to parameters: bigger compute-optimal models need proportionally more tokens. Since high-quality human text is a finite resource, that coupling turns "just scale up" into "find more data," motivating synthetic and multimodal data. The scaling law that enabled the boom also defines one of its ceilings.' },
         { t: 'text', title: 'The problems scale does not solve', md: `
-          <p>Some challenges are not dented by more compute — they are, if anything, sharpened by it:</p>
+          <p>Some challenges aren\'t dented by more compute — if anything, they\'re sharpened by it:</p>
           <ul>
-            <li><strong>Hallucination</strong> — a lower loss reduces but never eliminates confident fabrication, because plausibility is the objective and truth only correlates with it.</li>
+            <li><strong>Hallucination</strong> — lower loss reduces but never eliminates confident fabrication, because plausibility is the objective and truth only correlates with it.</li>
             <li><strong>Alignment</strong> — a more capable optimizer finds more ways to game an imperfect objective; the <code>&beta; &middot; KL</code> leash is a patch, not a solution.</li>
-            <li><strong>Interpretability</strong> — we still cannot fully read why a model does what it does, and the models are getting larger, not simpler.</li>
-            <li><strong>Evaluation</strong> — as capabilities emerge unpredictably, even measuring what a model can (and cannot safely) do is an unsolved, moving target.</li>
+            <li><strong>Interpretability</strong> — we still can\'t fully read why a model does what it does, and models keep getting larger, not simpler.</li>
+            <li><strong>Evaluation</strong> — as capabilities emerge unpredictably, measuring what a model can (and can\'t safely) do is an unsolved, moving target.</li>
           </ul>
-          <p>These are exactly the threads from the AI Safety course — now visible as consequences of the very mechanisms this course made precise.</p>` },
+          <p>These are exactly the threads from AI Safety — now visible as consequences of the mechanisms this course made precise.</p>` },
         { t: 'quiz',
           q: 'Why won\'t simply scaling models up make hallucination go away entirely?',
           opts: [
@@ -298,6 +342,14 @@ COURSES.push({
           ],
           a: 1,
           why: 'It is baked into the objective. Cross-entropy optimizes for plausible next tokens, not verified truth; where the two diverge (obscure facts), the model still must emit something plausible. Scale narrows the gap but cannot close it — which is why grounding (RAG), tools, and calibration matter, not just size.' },
+        { t: 'widget', name: 'flashcards', title: 'Try it: capstone vocabulary', cards: [
+          ['Data wall', "The looming shortage of high-quality human text needed to keep feeding Chinchilla's ~20 tokens/parameter rule as models grow"],
+          ['6ND rule', 'Training compute ≈ 6 × parameters × training tokens'],
+          ['KL leash', "The term in the RLHF objective that keeps the policy close to its reference model, so it can't over-optimize the reward model into gibberish"],
+          ['Emergent ability', 'A capability that appears to jump suddenly with scale, often because a harsh metric hides gradual underlying progress'],
+          ['Hallucination', 'Confident fabrication that persists because the training objective rewards plausible text, not verified truth'],
+          ['KV cache', 'Stored keys/values from prior tokens, reused during generation — the main memory cost of serving long conversations'],
+        ], md: `<p>One last pass over the vocabulary that ties this whole course together. Click a card to reveal its meaning.</p>` },
         { t: 'text', title: '🎓 The whole picture, in focus', md: `
           <p>You have reached the top of the mountain and can now see the entire range at once:</p>
           <ul>

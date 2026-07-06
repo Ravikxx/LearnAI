@@ -16,14 +16,7 @@ COURSES.push({
       steps: [
         { t: 'text', title: 'A third way to learn', md: `
           <p>Two paradigms you know: <strong>supervised</strong> learning (learn from labeled answers) and <strong>unsupervised</strong> (find structure with no labels). <strong>Reinforcement learning (RL)</strong> is the third, and it\'s different in kind: an <em>agent</em> learns by acting in an <em>environment</em> and receiving <strong>reward</strong>.</p>
-          <p>The loop, precisely:</p>
-          <ol>
-            <li>The agent observes the <strong>state</strong> (the situation, as numbers).</li>
-            <li>It picks an <strong>action</strong>.</li>
-            <li>The environment returns a <strong>reward</strong> (a number) and the next state.</li>
-            <li>Repeat. The agent\'s goal: maximize total reward over time.</li>
-          </ol>
-          <p>Nobody ever tells the agent the correct action. It must <em>discover</em> which actions lead to reward — the exact setup you watched in the gridworld widget.</p>` },
+          <p>The loop: the agent observes the <strong>state</strong> (the situation, as numbers), picks an <strong>action</strong>, and the environment returns a <strong>reward</strong> plus the next state. Repeat — the agent\'s goal is to maximize total reward over time. Nobody ever tells it the correct action; it must <em>discover</em> which actions lead to reward.</p>` },
         { t: 'quiz',
           q: 'What replaces the "labeled correct answers" of supervised learning in RL?',
           opts: [
@@ -34,9 +27,19 @@ COURSES.push({
           a: 1,
           why: 'RL learns from evaluative feedback ("how good was that?") rather than instructive feedback ("here\'s the right answer"). The reward tells the agent how well things went, not what it should have done — which is why RL can master problems no human can label move-by-move.' },
         { t: 'text', title: 'The explore–exploit dilemma', md: `
-          <p>An RL agent faces a tension with no perfect answer. Should it <strong>exploit</strong> — take the action it currently believes is best — or <strong>explore</strong> — try something new that might be even better (or might be worse)?</p>
-          <p>Pure exploitation gets stuck: the agent never discovers a better path than the first decent one it found. Pure exploration never cashes in on what it learned. Every RL method needs a way to balance the two.</p>
+          <p>An RL agent faces a tension with no perfect answer: should it <strong>exploit</strong> — take the action it currently believes is best — or <strong>explore</strong> — try something new that might be even better (or worse)?</p>
+          <p>Pure exploitation gets stuck on the first decent strategy it finds; pure exploration never cashes in on what it learned. Every RL method needs a way to balance the two.</p>
           <div class="callout">💡 It\'s the restaurant problem: always order your usual favorite (exploit) and you\'ll never find a dish you\'d love more (explore). Good agents do mostly-favorite, sometimes-adventurous.</div>` },
+        { t: 'widget', name: 'match', title: 'Try it: match the RL term to its meaning', md: `
+          <p>Pair each piece of RL vocabulary with what it means.</p>`,
+          pairs: [
+            ['State', 'The situation the agent observes, represented as numbers'],
+            ['Action', 'What the agent chooses to do in a given state'],
+            ['Reward', 'The numeric feedback signal the environment returns'],
+            ['Agent', 'The learner making decisions by interacting with the environment'],
+            ['Exploit', 'Take the action currently believed to be best'],
+            ['Explore', 'Try a new action that might turn out better (or worse)'],
+          ] },
         { t: 'quiz',
           q: 'An agent always picks the action it currently thinks is best and never tries anything else. What goes wrong?',
           opts: [
@@ -54,8 +57,8 @@ COURSES.push({
       minutes: 12,
       steps: [
         { t: 'text', title: 'How good is this situation?', md: `
-          <p>To act well, an agent needs to judge not just immediate reward but <em>long-term</em> payoff. A move that scores nothing now but sets up a win later is good. This is captured by a <strong>value</strong>: the total future reward you can expect from a state (or from taking an action in a state).</p>
-          <p>The action-value is called the <strong>Q-value</strong>, written <code>Q(state, action)</code>: "if I take this action here and play well afterward, how much total reward do I expect?" If the agent knew every Q-value, acting optimally would be trivial — in each state, pick the action with the highest Q.</p>` },
+          <p>To act well, an agent needs to judge not just immediate reward but <em>long-term</em> payoff — a move that scores nothing now but sets up a win later is good. This is a <strong>value</strong>: the total future reward you can expect from a state (or from taking an action in a state).</p>
+          <p>The action-value is the <strong>Q-value</strong>, <code>Q(state, action)</code>: "if I take this action here and play well afterward, how much total reward do I expect?" If the agent knew every Q-value, acting optimally would be trivial — in each state, pick the action with the highest Q.</p>` },
         { t: 'quiz',
           q: 'Why does an agent need a notion of "value" rather than just chasing immediate reward?',
           opts: [
@@ -68,7 +71,7 @@ COURSES.push({
         { t: 'text', title: 'The Q-learning update', md: `
           <p>The agent doesn\'t know the Q-values — it learns them from experience. After taking action <code>a</code> in state <code>s</code>, getting reward <code>r</code>, and landing in state <code>s\'</code>, <strong>Q-learning</strong> nudges its estimate:</p>
           <pre><code>Q(s,a) ← Q(s,a) + α · [ r + γ · maxₐ Q(s',a') − Q(s,a) ]</code></pre>
-          <p>In words: the new estimate blends toward "the reward I just got, plus the value of the best action available next." The <strong>discount factor</strong> <code>γ</code> (0–1) makes future reward worth slightly less than immediate reward. The <strong>learning rate</strong> <code>α</code> controls how big each nudge is. Run this millions of times and the Q-values converge toward the truth.</p>
+          <p>In words: blend the estimate toward "the reward I just got, plus the value of the best next action." <code>γ</code> (0–1) discounts future reward slightly below immediate reward; <code>α</code> controls how big each nudge is. Run this millions of times and Q-values converge toward the truth.</p>
           <div class="callout">💡 Q-learning is <strong>off-policy</strong>: notice the <code>max</code> — it learns the value of the <em>best</em> next move, even while the agent is exploring random ones. So it can learn the optimal strategy from messy, exploratory experience.</div>` },
         { t: 'widget', name: 'rlagent', title: 'Try it: Q-learning in action', md: `
           <p>The gridworld from the survey course, now with the machinery named. Each cell\'s color is <code>maxₐ Q(s,a)</code> — the value the agent has learned. Press <strong>Train</strong> and watch those Q-values propagate <em>backward</em> from the goal (★) as the update above fires over and over. The arrows are the agent picking the highest-Q action in each state.</p>` },
@@ -89,8 +92,8 @@ COURSES.push({
       minutes: 11,
       steps: [
         { t: 'text', title: 'Why a table stops working', md: `
-          <p>The gridworld has 36 states, so its Q-values fit in a small table. But real problems explode: the possible screens in an Atari game, or board positions in Go (more than the atoms in the universe), can never be enumerated in a table. You\'d never even <em>visit</em> most states once.</p>
-          <p>The fix is the big idea from the neural-nets course: replace the lookup table with a <strong>neural network</strong> that <em>approximates</em> Q-values. Feed it a state (the raw pixels, the board), and it outputs estimated Q-values for each action — and crucially, it <strong>generalizes</strong> to states it has never seen, because similar states produce similar outputs.</p>` },
+          <p>The gridworld has 36 states, so its Q-values fit in a small table. Real problems explode: the possible screens in an Atari game, or board positions in Go (more than the atoms in the universe), can never be enumerated. You\'d never even <em>visit</em> most states once.</p>
+          <p>The fix: replace the lookup table with a <strong>neural network</strong> that <em>approximates</em> Q-values. Feed it a state (raw pixels, a board), and it outputs estimated Q-values for each action — and it <strong>generalizes</strong> to states it has never seen, because similar states produce similar outputs.</p>` },
         { t: 'quiz',
           q: 'Why can\'t tabular Q-learning handle a game like Go or a screen of Atari pixels?',
           opts: [

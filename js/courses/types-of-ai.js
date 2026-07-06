@@ -15,16 +15,24 @@ COURSES.push({
       minutes: 9,
       steps: [
         { t: 'text', title: 'One machine wearing many hats', md: `
-          <p>Text generators, face detectors, image painters, chess engines — they look like wildly different inventions. Under the hood they\'re startlingly similar. Almost every one is the same basic machine: a <strong>neural network</strong>, which is just a big math function that takes in a list of numbers and puts out a list of numbers.</p>
-          <p>That\'s it. Numbers in, numbers out. A neural network never actually handles a word, a pixel, or a chess move — it handles numbers that <em>stand for</em> those things.</p>
+          <p>Text generators, face detectors, image painters, chess engines — wildly different inventions on the surface. Under the hood, almost every one is the same basic machine: a <strong>neural network</strong>, a big math function that takes in a list of numbers and puts out a list of numbers.</p>
+          <p>That\'s it. A neural network never actually handles a word, a pixel, or a chess move — it handles numbers that <em>stand for</em> those things.</p>
           <div class="callout">💡 So what makes an "image model" different from a "text model"? Not the math inside — mostly the same. What differs is (1) what the numbers <em>represent</em>, and (2) what data it was trained on. That\'s the whole idea behind "types" of AI.</div>` },
         { t: 'text', title: 'Meaning lives at the edges', md: `
           <p>If the network only sees numbers, where does <em>meaning</em> come from? From two translators bolted onto the ends:</p>
           <ul>
-            <li>An <strong>encoder</strong> turns real-world stuff into numbers going in. Text becomes token IDs; an image becomes pixel brightness values; sound becomes a list of air-pressure samples.</li>
-            <li>A <strong>decoder</strong> turns the output numbers back into real-world stuff. A number becomes a chosen word; a grid of numbers becomes a displayed image; an output becomes "move the paddle up."</li>
+            <li>An <strong>encoder</strong> turns real-world stuff into numbers going in — text into token IDs, an image into pixel brightness values, sound into air-pressure samples.</li>
+            <li>A <strong>decoder</strong> turns output numbers back into real-world stuff — a number into a chosen word, a grid of numbers into a displayed image, an output into "move the paddle up."</li>
           </ul>
-          <p>The network in the middle is blissfully ignorant of all of it. It doesn\'t know "cat" is an animal or that 7 is bigger than 3 — it just learned which output-numbers to produce for which input-numbers. <strong>We</strong> assign the meaning, on the outside.</p>` },
+          <p>The network in the middle never learns that "cat" is an animal — it just learns which output-numbers to produce for which input-numbers. <strong>We</strong> assign the meaning, on the outside.</p>` },
+        { t: 'widget', name: 'classify', title: 'Try it: encoder job or decoder job?', buckets: ['Encoder (real world → numbers)', 'Decoder (numbers → real world)'], items: [
+          ['Turning text into token IDs', 0],
+          ['Turning a number into a chosen word', 1],
+          ['Turning an image into pixel brightness values', 0],
+          ['Turning a grid of output numbers into a displayed image', 1],
+          ['Turning sound into air-pressure samples', 0],
+          ["Turning an output number into \\'move the paddle up\\'", 1],
+        ], md: `<p>Every model has these two translators bolted onto its ends. Sort each job by which side it belongs on.</p>` },
         { t: 'quiz',
           q: 'In one sentence: what actually distinguishes an "image model" from a "text model"?',
           opts: [

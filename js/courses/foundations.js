@@ -15,10 +15,10 @@ COURSES.push({
       minutes: 8,
       steps: [
         { t: 'text', title: 'Two ways to make a machine "smart"', md: `
-          <p>Imagine you're building a spam filter for email. You have two options.</p>
-          <p><strong>Option 1 — Write rules.</strong> "If the email contains the word FREE in all caps, mark it as spam. If it mentions a prince with a fortune, spam."</p>
-          <p><strong>Option 2 — Show examples.</strong> Give the machine 10,000 emails that humans already labeled as spam or not-spam, and let it <em>figure out the patterns itself</em>.</p>
-          <p>Option 1 is classic programming. Option 2 is <strong>machine learning</strong> — and it's the engine behind almost everything called "AI" today.</p>` },
+          <p>Building a spam filter, you have two options.</p>
+          <p><strong>Option 1 — Write rules.</strong> "If the email says FREE in all caps, or mentions a prince with a fortune, mark it spam."</p>
+          <p><strong>Option 2 — Show examples.</strong> Give the machine 10,000 labeled emails and let it <em>find the patterns itself</em>.</p>
+          <p>Option 1 is classic programming. Option 2 is <strong>machine learning</strong> — the engine behind almost everything called "AI" today.</p>` },
         { t: 'quiz',
           q: 'Spammers start writing "FR3E" instead of "FREE" to dodge filters. Which approach handles this better?',
           opts: [
@@ -29,10 +29,9 @@ COURSES.push({
           a: 1,
           why: 'With rules, a human has to notice the trick and write a new rule — forever, for every trick. A learning system just needs new labeled examples, and it updates its own patterns. This adaptability is the whole point of ML.' },
         { t: 'text', title: 'Why rules break down', md: `
-          <p>Rules work great for problems humans can fully describe: tax calculations, chess movement rules, sorting a list.</p>
-          <p>But try writing rules for: <em>"Is there a cat in this photo?"</em></p>
-          <p>Where do you even start? "If there are pointy ears..." — but the cat might be curled up asleep. "If there's fur..." — so is a dog. Humans recognize cats instantly, but we <strong>can't articulate how we do it</strong>.</p>
-          <div class="callout">💡 Machine learning shines exactly where humans can do a task but can't explain the steps: recognizing faces, understanding speech, translating language.</div>` },
+          <p>Rules work great when humans can fully describe the problem: tax formulas, chess moves, sorting a list.</p>
+          <p>But try writing rules for <em>"is there a cat in this photo?"</em> Pointy ears? The cat might be asleep, curled up. Fur? So does a dog. We recognize cats instantly but <strong>can't explain how</strong>.</p>
+          <div class="callout">💡 ML shines exactly where humans can do a task but can't articulate the steps: recognizing faces, understanding speech, translating language.</div>` },
         { t: 'quiz',
           q: 'Which of these tasks is the WORST fit for machine learning?',
           opts: [
@@ -43,13 +42,19 @@ COURSES.push({
           a: 1,
           why: 'Sales tax has an exact, known formula — just program it directly! ML is for problems where the rules are unknown or too fuzzy to write down. Using ML for exact math would be slower AND less reliable.' },
         { t: 'text', title: 'AI, ML, deep learning — untangling the words', md: `
-          <p>These words get used interchangeably, but they're nested like Russian dolls:</p>
+          <p>These words get used interchangeably, but they nest like Russian dolls:</p>
           <ul>
-            <li><strong>AI</strong> — the big umbrella: any machine doing something that seems intelligent.</li>
-            <li><strong>Machine Learning</strong> — a subset of AI: machines that learn from data instead of following hand-written rules.</li>
-            <li><strong>Deep Learning</strong> — a subset of ML: learning done with <em>neural networks</em> stacked in many layers. This powers image recognition, voice assistants, and ChatGPT.</li>
-          </ul>
-          <p>Everything hot in AI right now — chatbots, image generators, self-driving perception — is deep learning.</p>` },
+            <li><strong>AI</strong> — the umbrella: any machine doing something that seems intelligent.</li>
+            <li><strong>Machine Learning</strong> — a subset of AI: learning from data instead of hand-written rules.</li>
+            <li><strong>Deep Learning</strong> — a subset of ML: learning with neural networks stacked in many layers. Powers chatbots, image generators, and self-driving perception.</li>
+          </ul>` },
+        { t: 'widget', name: 'match', title: 'Try it: match the term', md: `
+          <p>Click one item from each column to pair it with its match.</p>`, pairs: [
+          ['AI', 'Any machine behaving in a way that seems intelligent'],
+          ['Machine Learning', 'Learns patterns from data instead of hard-coded rules'],
+          ['Deep Learning', 'Machine learning using many-layered neural networks'],
+          ['Rule-based programming', 'A human writes the exact if-then logic by hand'],
+        ] },
         { t: 'quiz',
           q: 'ChatGPT is best described as...',
           opts: [
@@ -60,14 +65,13 @@ COURSES.push({
           a: 2,
           why: 'ChatGPT is a deep neural network (deep learning), trained on data (machine learning), doing something intelligent-seeming (AI). The dolls nest: everything in the inner circle is also in the outer ones.' },
         { t: 'text', title: 'The recipe', md: `
-          <p>Nearly every ML system follows the same recipe:</p>
-          <ol>
-            <li><strong>Collect data</strong> — examples of inputs and the answers you want (emails + spam labels, photos + "cat/no cat").</li>
-            <li><strong>Pick a model</strong> — a flexible mathematical machine with adjustable knobs (called <em>parameters</em>).</li>
-            <li><strong>Train</strong> — automatically turn the knobs until the model's answers match the examples.</li>
-            <li><strong>Use it</strong> — feed it new inputs it's never seen and trust its answers.</li>
-          </ol>
-          <p>The next lessons unpack each step. The "turn the knobs automatically" part — training — is where the magic (and the math) lives.</p>` },
+          <p>Nearly every ML system follows the same recipe: collect data, pick a model, train it, use it. Put the steps below in order.</p>` },
+        { t: 'widget', name: 'order', title: 'Try it: order the ML recipe', items: [
+          'Collect data — examples of inputs and the answers you want',
+          'Pick a model — a flexible mathematical machine with adjustable knobs (parameters)',
+          'Train — automatically tune the knobs until the model\'s answers match the examples',
+          'Use it — feed it new inputs it\'s never seen and trust its answers',
+        ] },
         { t: 'quiz',
           q: 'GPT-4 reportedly has over a trillion parameters. In the recipe above, what ARE parameters?',
           opts: [
@@ -85,10 +89,9 @@ COURSES.push({
       minutes: 9,
       steps: [
         { t: 'text', title: 'Features and labels', md: `
-          <p>Say you want to predict a house's price. The machine can't look at a house — it needs numbers.</p>
-          <p><strong>Features</strong> are the input numbers describing each example: square footage, number of bedrooms, distance to downtown.</p>
-          <p><strong>The label</strong> is the answer you want to predict: the price.</p>
-          <p>A dataset is just a big table: each row is one house, feature columns plus a label column. Learning means finding the relationship between features and labels.</p>` },
+          <p>To predict a house's price, the machine needs numbers, not a photo.</p>
+          <p><strong>Features</strong> are the inputs describing each example: square footage, bedrooms, distance to downtown. <strong>The label</strong> is the answer you want: the price.</p>
+          <p>A dataset is just a table — one row per house, feature columns plus a label column. Learning means finding the relationship between them.</p>` },
         { t: 'quiz',
           q: 'You\'re building a model to predict whether a student passes an exam. Which is the LABEL?',
           opts: [
@@ -99,11 +102,10 @@ COURSES.push({
           a: 2,
           why: 'The label is the thing you\'re trying to predict — pass/fail. Hours studied and slept are features: the input clues the model uses to make its prediction.' },
         { t: 'text', title: 'Supervised learning', md: `
-          <p>When every training example comes with its correct label, it's called <strong>supervised learning</strong> — like studying with an answer key.</p>
-          <p>Two big flavors:</p>
+          <p>When every example comes with its correct label, that's <strong>supervised learning</strong> — studying with an answer key. Two flavors:</p>
           <ul>
-            <li><strong>Regression</strong> — predicting a number: house price, tomorrow's temperature, a video's watch time.</li>
-            <li><strong>Classification</strong> — predicting a category: spam/not-spam, cat/dog/bird, which digit is in this image.</li>
+            <li><strong>Regression</strong> — predicting a number: house price, tomorrow's temperature.</li>
+            <li><strong>Classification</strong> — predicting a category: spam/not-spam, which digit is in an image.</li>
           </ul>` },
         { t: 'quiz',
           q: 'Predicting how many minutes your food delivery will take is...',
@@ -115,9 +117,16 @@ COURSES.push({
           a: 1,
           why: 'The raw prediction is a number of minutes → regression. (The app might BUCKET that number into "arriving soon" for display, but the model predicts a quantity.)' },
         { t: 'text', title: 'Learning without an answer key', md: `
-          <p>What if you have data but no labels? That's <strong>unsupervised learning</strong>: finding structure in data on its own.</p>
-          <p>The classic example is <strong>clustering</strong>: give a streaming service everyone's watch history, and it discovers natural groups — "horror fans," "cooking-show bingers" — without anyone defining those groups first.</p>
-          <p>There's also a third paradigm, <strong>reinforcement learning</strong>: an agent learns by trial and error, getting rewards for good moves. It's how AI learned to beat world champions at Go.</p>` },
+          <p>No labels? That's <strong>unsupervised learning</strong> — finding structure on its own. Classic example: <strong>clustering</strong>, where a streaming service groups viewers into "horror fans" or "cooking-show bingers" without anyone defining those groups first.</p>
+          <p>A third paradigm, <strong>reinforcement learning</strong>, learns by trial and error — rewards for good moves. It's how AI learned to beat world champions at Go.</p>` },
+        { t: 'widget', name: 'classify', title: 'Try it: supervised or unsupervised?', buckets: ['Supervised', 'Unsupervised'], items: [
+          ['Spam filter trained on emails already labeled spam / not-spam', 0],
+          ['Grouping shoppers into behavior clusters nobody defined in advance', 1],
+          ['Predicting house price from past sales with known prices', 0],
+          ['Finding topics in a pile of unlabeled news articles', 1],
+          ['Predicting pass/fail from exam scores with known outcomes', 0],
+          ['Grouping songs by acoustic similarity with no genre tags', 1],
+        ] },
         { t: 'quiz',
           q: 'Match the scenario: a bank groups customers by spending behavior to discover customer "types" it didn\'t know existed. This is...',
           opts: [
@@ -128,11 +137,10 @@ COURSES.push({
           a: 1,
           why: 'No answer key exists — the "types" aren\'t known in advance. The algorithm finds the groups itself. That\'s the signature of unsupervised learning.' },
         { t: 'text', title: 'A model is a function with knobs', md: `
-          <p>Here's the simplest possible model, for predicting house price from size:</p>
+          <p>The simplest possible model, predicting house price from size:</p>
           <p style="text-align:center"><code>price = w × size + b</code></p>
-          <p>Just a line! <code>w</code> (the slope: dollars per square foot) and <code>b</code> (the base price) are the model's two <strong>parameters</strong> — its knobs.</p>
-          <p>Different knob settings give different lines. Training = finding the knob settings whose line best matches the real data. You'll do exactly that, by hand, in the next lesson.</p>
-          <div class="callout">💡 GPT-4's trillion parameters and this line's two parameters are the same kind of thing: knobs that training adjusts. The difference is scale, not concept.</div>` },
+          <p>Just a line. <code>w</code> (dollars per square foot) and <code>b</code> (base price) are the model's two <strong>parameters</strong> — its knobs. Different knob settings give different lines; training finds the settings whose line best matches the data.</p>
+          <div class="callout">💡 GPT-4's trillion parameters and this line's two are the same kind of thing: knobs that training adjusts. The difference is scale, not concept.</div>` },
         { t: 'quiz',
           q: 'In <code>price = w × size + b</code>, suppose training finds w = 300 and b = 50,000. What does the model predict for a 1,000 sq ft house?',
           opts: [
@@ -150,20 +158,11 @@ COURSES.push({
       minutes: 10,
       steps: [
         { t: 'text', title: 'How wrong is the model?', md: `
-          <p>Training means adjusting knobs until the model fits the data. But "fits" needs a number — a score that says exactly <em>how wrong</em> the current knob settings are.</p>
-          <p>That score is called the <strong>loss</strong> (or cost, or error). The rules of the game:</p>
-          <ul>
-            <li>Perfect predictions → loss = 0</li>
-            <li>Worse predictions → bigger loss</li>
-          </ul>
-          <p>Training becomes a clean goal: <strong>find the knob settings with the lowest loss.</strong></p>` },
+          <p>Training adjusts knobs until the model fits the data — but "fits" needs a number: the <strong>loss</strong> (or cost, or error), which says exactly how wrong the current knobs are. Perfect predictions → loss 0; worse predictions → bigger loss.</p>
+          <p>Training becomes one clean goal: <strong>find the knob settings with the lowest loss.</strong></p>` },
         { t: 'text', title: 'Mean squared error', md: `
-          <p>The most common loss for regression: for each data point, take the difference between prediction and truth (the <em>error</em>), square it, then average over all points. This is <strong>mean squared error (MSE)</strong>.</p>
-          <p>Why square? Two reasons:</p>
-          <ul>
-            <li>Errors of −5 and +5 are equally bad — squaring makes both count as 25 instead of canceling out.</li>
-            <li>Squaring punishes big misses <em>much</em> harder: being off by 10 costs 100, being off by 1 costs just 1.</li>
-          </ul>` },
+          <p>The most common regression loss: for each point, take the error (prediction minus truth), square it, average over all points. That's <strong>mean squared error (MSE)</strong>.</p>
+          <p>Why square? Errors of −5 and +5 are equally bad — squaring makes both 25 instead of canceling out. And it punishes big misses much harder: off by 10 costs 100; off by 1 costs 1.</p>` },
         { t: 'quiz',
           q: 'Model A misses two points by 3 and 3. Model B misses them by 0 and 6. Using squared error, which is better?',
           opts: [
@@ -185,9 +184,8 @@ COURSES.push({
           a: 1,
           why: 'You just performed gradient descent by hand! "Which direction makes loss go down? Move that way. Repeat." The next lesson shows how machines do this — automatically, and even with a trillion knobs at once.' },
         { t: 'text', title: 'The loss landscape', md: `
-          <p>Picture every possible knob setting as a location, and the loss at that setting as the <em>altitude</em>. With two knobs (like our w and b), this forms a landscape — a surface with hills (high loss = bad fit) and valleys (low loss = good fit).</p>
-          <p><strong>Training is hiking downhill in this landscape</strong>, searching for the lowest valley.</p>
-          <p>One problem: with a trillion knobs, you can't check every location. You need a way to know which direction is downhill <em>from where you stand</em>. That's the next lesson.</p>` },
+          <p>Picture every knob setting as a location, and the loss there as its <em>altitude</em>. With two knobs (w and b), this forms a landscape of hills (bad fits) and valleys (good fits).</p>
+          <p><strong>Training is hiking downhill</strong> in this landscape, searching for the lowest valley. Problem: with a trillion knobs, you can't check every location — you need to know which way is downhill <em>from where you stand</em>. That's next.</p>` },
       ],
     },
     {
@@ -196,9 +194,8 @@ COURSES.push({
       minutes: 10,
       steps: [
         { t: 'text', title: 'Hiking downhill in fog', md: `
-          <p>You're on a foggy mountainside and want to reach the valley. You can't see far — but you can feel the slope under your feet.</p>
-          <p>Strategy: feel which way is steepest downhill, take a step that way, repeat.</p>
-          <p>That's <strong>gradient descent</strong>. The <em>gradient</em> is the slope of the loss at the current knob settings — calculus computes it exactly, telling each knob which direction (and how strongly) to move to reduce loss.</p>` },
+          <p>You're on a foggy mountainside, trying to reach the valley. You can't see far, but you can feel the slope underfoot: feel which way is steepest downhill, step that way, repeat.</p>
+          <p>That's <strong>gradient descent</strong>. The <em>gradient</em> is the slope of the loss at the current knob settings — calculus computes it exactly, telling each knob which way (and how strongly) to move to reduce loss.</p>` },
         { t: 'widget', name: 'gradient', title: 'Try it: roll down the loss curve', md: `
           <p>This curve is a loss landscape for a single knob. The ball is the current knob setting. Press <strong>Step</strong> to take one gradient descent step. Then play with the <strong>learning rate</strong> — the size of each step — and see what happens when it's tiny... or too big.</p>` },
         { t: 'quiz',
@@ -211,15 +208,15 @@ COURSES.push({
           a: 1,
           why: 'Big steps overshoot the minimum — the ball leaps across the valley and can end up higher than it started, diverging entirely. Too small wastes time; too big explodes. Picking a good learning rate is one of the most important settings in all of deep learning.' },
         { t: 'text', title: 'The full training loop', md: `
-          <p>Now you can assemble the complete algorithm that trains everything from spam filters to GPT:</p>
+          <p>Now assemble the full algorithm that trains everything from spam filters to GPT:</p>
           <ol>
-            <li><strong>Predict:</strong> run a batch of training examples through the model.</li>
-            <li><strong>Score:</strong> compute the loss (how wrong were we?).</li>
-            <li><strong>Compute gradients:</strong> for each knob, find which direction reduces loss.</li>
-            <li><strong>Step:</strong> nudge every knob a little in its downhill direction.</li>
+            <li><strong>Predict:</strong> run training examples through the model.</li>
+            <li><strong>Score:</strong> compute the loss.</li>
+            <li><strong>Compute gradients:</strong> find which direction reduces loss, for each knob.</li>
+            <li><strong>Step:</strong> nudge every knob in its downhill direction.</li>
             <li><strong>Repeat</strong> — millions of times.</li>
           </ol>
-          <div class="callout">💡 This loop is the beating heart of AI. Training GPT-4 was this exact loop, run on thousands of GPUs for months, adjusting a trillion knobs. Nothing conceptually different from your ball rolling downhill.</div>` },
+          <div class="callout">💡 This loop is the beating heart of AI. Training GPT-4 is this exact loop, run on thousands of GPUs for months, adjusting a trillion knobs — nothing conceptually different from a ball rolling downhill.</div>` },
         { t: 'quiz',
           q: 'Local minima: the ball can get stuck in a small dip that isn\'t the deepest valley. Why does this worry people less in giant neural networks?',
           opts: [
@@ -237,9 +234,9 @@ COURSES.push({
       minutes: 9,
       steps: [
         { t: 'text', title: 'The student who memorized the textbook', md: `
-          <p>Imagine a student who memorizes every practice exam word-for-word — questions and answers. On those exact exams: perfect score. On a new exam: disaster. They memorized; they never <em>understood</em>.</p>
-          <p>Models do this too. A model with enough knobs can effectively memorize its training data, scoring a perfect loss — while learning nothing about the real pattern. This is <strong>overfitting</strong>.</p>
-          <p>The goal was never to do well on training data. It's to do well on <strong>new</strong> data. That ability is called <strong>generalization</strong>.</p>` },
+          <p>A student memorizes every practice exam word-for-word. On those exact exams: perfect score. On a new exam: disaster. They memorized; they never <em>understood</em>.</p>
+          <p>Models do this too — with enough knobs, a model can memorize its training data, scoring a perfect loss while learning nothing about the real pattern. That's <strong>overfitting</strong>.</p>
+          <p>The goal was never training performance. It's doing well on <strong>new</strong> data — <strong>generalization</strong>.</p>` },
         { t: 'quiz',
           q: 'Your model gets 99% accuracy on training data but 62% on new data. What happened?',
           opts: [
@@ -250,10 +247,9 @@ COURSES.push({
           a: 1,
           why: 'A huge gap between training performance and new-data performance is the classic overfitting signature. The 99% is a mirage. (Underfitting would look like BAD performance on both.)' },
         { t: 'text', title: 'The train/test split', md: `
-          <p>How do you catch overfitting? Simple, brilliant trick: <strong>hide some data</strong>.</p>
-          <p>Before training, split your data — typically ~80% for <strong>training</strong>, ~20% held back as the <strong>test set</strong>. The model never sees the test set during training.</p>
-          <p>After training, evaluate on the test set. It's a surprise exam with questions the student couldn't have memorized. Test performance is the honest measure of your model.</p>
-          <div class="callout">⚠️ Cardinal sin of ML: letting test data leak into training. It's grading a student on questions they already saw — the score becomes meaningless. Data leakage quietly ruins real-world projects all the time.</div>` },
+          <p>Catching overfitting: <strong>hide some data</strong>. Before training, split it — typically ~80% <strong>training</strong>, ~20% held-back <strong>test set</strong> the model never sees during training.</p>
+          <p>Afterward, evaluate on the test set — a surprise exam with questions the student couldn't have memorized. That's the honest measure of your model.</p>
+          <div class="callout">⚠️ Cardinal sin of ML: letting test data leak into training. It's grading a student on questions they already saw. Data leakage quietly ruins real-world projects all the time.</div>` },
         { t: 'quiz',
           q: 'A researcher tunes their model repeatedly, each time checking test-set accuracy and tweaking until test accuracy is high. What\'s the problem?',
           opts: [
@@ -266,12 +262,20 @@ COURSES.push({
         { t: 'text', title: 'Fighting overfitting', md: `
           <p>The classic remedies:</p>
           <ul>
-            <li><strong>More data</strong> — the best cure. It's easy to memorize 10 examples, nearly impossible to memorize 10 billion; the model is forced to learn the actual pattern.</li>
-            <li><strong>Simpler model</strong> — fewer knobs = less memorization capacity.</li>
-            <li><strong>Regularization</strong> — penalties and tricks (like <em>dropout</em>: randomly disabling parts of the network during training) that discourage memorization.</li>
-            <li><strong>Early stopping</strong> — halt training when performance on held-out data stops improving.</li>
+            <li><strong>More data</strong> — the best cure; nearly impossible to memorize billions of examples, so the model is forced to learn the real pattern.</li>
+            <li><strong>Simpler model</strong> — fewer knobs, less memorization capacity.</li>
+            <li><strong>Regularization</strong> — tricks like <em>dropout</em> (randomly disabling parts of the network during training) that discourage memorization.</li>
+            <li><strong>Early stopping</strong> — halt training when held-out performance stops improving.</li>
           </ul>
           <p>This tension — flexible enough to learn, constrained enough to generalize — runs through all of machine learning.</p>` },
+        { t: 'widget', name: 'match', title: 'Try it: match the concept', md: `
+          <p>Click one item from each column to pair it with its match.</p>`, pairs: [
+          ['Overfitting', 'Great training score, poor score on new data'],
+          ['Underfitting', 'Poor score on both training and new data'],
+          ['Regularization', 'Tricks like dropout that discourage memorization'],
+          ['Train/test split', 'Holding back data to honestly measure generalization'],
+          ['More data', 'The best cure — makes memorizing everything impractical'],
+        ] },
         { t: 'quiz',
           q: 'Why are today\'s giant models (trained on much of the internet) surprisingly resistant to classic overfitting?',
           opts: [
