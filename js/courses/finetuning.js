@@ -34,7 +34,19 @@ COURSES.push({
         { t: 'text', title: 'The rule that saves you: behavior vs knowledge', md: `
           <p>Here is the distinction that decides everything — and that people constantly get backwards:</p>
           <div class="callout">💡 <strong>Fine-tuning changes behavior and style. RAG adds knowledge.</strong> Want the model to always answer in your brand voice, output a specific JSON format, or adopt a skill/tone? Fine-tune. Want it to know your company\'s latest docs or today\'s facts? RAG.</div>
-          <p>Fine-tuning is a <em>poor</em> way to inject facts: the model may memorize them unreliably, you\'d have to retrain every time a fact changes, and it can hallucinate around them anyway. RAG keeps facts in an external store you can update instantly. Match the tool to the need and you avoid the most expensive class of mistakes in applied AI.</p>` },
+          <p>Fine-tuning is a <em>poor</em> way to inject facts: the model may memorize them unreliably, you\'d have to retrain every time a fact changes, and it can hallucinate around them anyway. RAG keeps facts in an external store you can update instantly.</p>` },
+        { t: 'widget', name: 'classify', title: 'Prompting, RAG, or fine-tuning?', md: `<p>Pick the right tool for each situation.</p>`,
+          buckets: ['Prompting', 'RAG', 'Fine-tuning'],
+          items: [
+            ['Model gets the format wrong sometimes; two examples in the prompt fix it', 0],
+            ['Model just needs clearer instructions to get the task right', 0],
+            ['Model doesn\'t know your company\'s product that launched last week', 1],
+            ['Model needs to cite your internal wiki, which updates daily', 1],
+            ['You need answers grounded in this morning\'s stock prices', 1],
+            ['You want the model to always respond in your brand\'s specific tone', 2],
+            ['You want the model to always output valid JSON matching your exact schema', 2],
+            ['You want the model to adopt a new specialized skill or behavior pattern', 2],
+          ] },
         { t: 'quiz',
           q: 'You want a model to reliably answer using your company\'s constantly-updated internal documentation. Fine-tune or RAG?',
           opts: [
@@ -60,6 +72,14 @@ COURSES.push({
     loss.backward()
     opt.step()</code></pre>
           <p>The model already knows language, facts, and reasoning from pretraining. You\'re just nudging it toward your specific task with a comparatively tiny amount of data — hundreds to thousands of examples, not trillions of tokens.</p>` },
+        { t: 'widget', name: 'order', title: 'Order the training loop', md: `<p>You just saw this code — now sequence the steps of a single training iteration.</p>`,
+          items: [
+            'Zero out old gradients (opt.zero_grad())',
+            'Run the forward pass on a batch to get predictions',
+            'Compute the loss against the targets (cross-entropy)',
+            'Backpropagate to compute gradients (loss.backward())',
+            'Update the weights with the optimizer (opt.step())',
+          ] },
         { t: 'quiz',
           q: 'What\'s fundamentally different about the fine-tuning training loop versus training from scratch?',
           opts: [
@@ -70,12 +90,12 @@ COURSES.push({
           a: 1,
           why: 'Same forward/loss/backward/step loop you already know. The power comes from the starting point: pretrained weights already encode language and reasoning, so you only need to nudge them toward your task — which is why fine-tuning needs a tiny fraction of the data pretraining did.' },
         { t: 'text', title: 'The danger: catastrophic forgetting', md: `
-          <p>Push too hard and you break what you paid for. <strong>Catastrophic forgetting</strong> is when fine-tuning on your narrow data overwrites the broad capabilities from pretraining — the model gets great at your task but loses general fluency, reasoning, or safety behavior.</p>
-          <p>The defenses are the overfitting toolkit from Foundations, plus one key setting:</p>
+          <p>Push too hard and you break what you paid for. <strong>Catastrophic forgetting</strong> is when fine-tuning on your narrow data overwrites broad pretrained capabilities — the model gets great at your task but loses general fluency, reasoning, or safety behavior.</p>
+          <p>The defenses, beyond the overfitting toolkit from Foundations:</p>
           <ul>
             <li><strong>A small learning rate</strong> — nudge the weights gently; big steps blow away pretrained knowledge.</li>
             <li><strong>Few epochs</strong> — don\'t hammer the same small dataset over and over.</li>
-            <li><strong>Quality over quantity</strong> — a few hundred clean, consistent examples beat thousands of noisy ones. Bad data teaches bad behavior, faithfully.</li>
+            <li><strong>Quality over quantity</strong> — a few hundred clean, consistent examples beat thousands of noisy ones.</li>
           </ul>` },
         { t: 'quiz',
           q: 'A model fine-tuned on a narrow task suddenly gets worse at general reasoning it used to handle. What happened?',
@@ -100,7 +120,7 @@ COURSES.push({
           <p>LoRA\'s insight: you don\'t need to move all the weights. Instead:</p>
           <ul>
             <li><strong>Freeze the entire pretrained model</strong> — its billions of weights never change.</li>
-            <li>Inject tiny <strong>low-rank adapter</strong> matrices alongside certain layers, and train <em>only those</em>. They\'re a small fraction — often well under 1% — of the total parameters.</li>
+            <li>Inject tiny <strong>low-rank adapter</strong> matrices alongside certain layers, and train <em>only those</em> — often well under 1% of the total parameters.</li>
           </ul>
           <pre><code>from peft import LoraConfig, get_peft_model
 
@@ -108,7 +128,17 @@ cfg = LoraConfig(r=8, target_modules=["q_proj", "v_proj"])
 model = get_peft_model(base_model, cfg)   # base stays frozen
 model.print_trainable_parameters()
 # trainable: 4.2M / 6.7B  (0.06%)</code></pre>
-          <p>Because you only train and store the little adapters, memory drops dramatically and each fine-tune produces a few-megabyte adapter file instead of a multi-gigabyte model. You can keep dozens of task adapters and snap them onto the same frozen base.</p>` },
+          <p>You only train and store the little adapters, so memory drops dramatically and each fine-tune produces a few-megabyte adapter file instead of a multi-gigabyte model. You can keep dozens of task adapters and snap them onto the same frozen base.</p>` },
+        { t: 'widget', name: 'classify', title: 'Frozen, or trained?', md: `<p>Sort each piece of a LoRA fine-tune by what happens to it.</p>`,
+          buckets: ['Frozen', 'Trained (LoRA adapters)'],
+          items: [
+            ['The billions of pretrained weights in the base model', 0],
+            ['The original q_proj and v_proj matrices', 0],
+            ['Most of the model\'s layers, untouched during fine-tuning', 0],
+            ['The small low-rank adapter matrices injected into attention layers', 1],
+            ['The rank-8 matrices that receive gradient updates', 1],
+            ['The few-megabyte file you save after a LoRA fine-tune', 1],
+          ] },
         { t: 'quiz',
           q: 'In LoRA fine-tuning, what happens to the original pretrained weights?',
           opts: [
@@ -138,7 +168,7 @@ model.print_trainable_parameters()
           <p>With LoRA making the compute cheap, the hard part becomes the <strong>data</strong>. For instruction fine-tuning, your dataset is a set of example <em>input → desired output</em> pairs that demonstrate the behavior you want:</p>
           <pre><code>{"prompt": "Summarize this ticket: ...", "response": "..."}
 {"prompt": "Summarize this ticket: ...", "response": "..."}</code></pre>
-          <p>The model learns the pattern in your examples — so their quality, consistency, and coverage <em>are</em> the fine-tune. Consistent formatting, correct outputs, and a spread of the cases you actually care about matter far more than raw volume. Garbage examples produce a model that faithfully reproduces garbage.</p>` },
+          <p>The model learns the pattern in your examples, so their quality, consistency, and coverage <em>are</em> the fine-tune — that matters far more than raw volume. Garbage examples produce a model that faithfully reproduces garbage.</p>` },
         { t: 'quiz',
           q: 'For instruction fine-tuning, what matters most about your training examples?',
           opts: [
@@ -149,8 +179,17 @@ model.print_trainable_parameters()
           a: 1,
           why: 'Fine-tuning is imitation: the model copies the behavior in your examples. Inconsistent or wrong examples teach inconsistent or wrong behavior. A few hundred clean, representative pairs beat thousands of sloppy ones — curating the dataset is the real work, and the real lever on quality.' },
         { t: 'text', title: 'Don\'t fool yourself: evaluate honestly', md: `
-          <p>Every lesson of Foundations comes due here. Hold out a <strong>validation set</strong> your fine-tune never trains on, and judge success there — not on the training examples, where a memorizing model looks perfect and generalizes terribly. Watch for the train/validation gap that signals overfitting.</p>
-          <p>And evaluate on what you actually care about: does it beat a good prompt on the <em>base</em> model? (Sometimes it doesn\'t — always check.) The whole workflow is a loop: curate data → LoRA fine-tune → evaluate on held-out cases → find failures → improve the data → repeat. Fine-tuning isn\'t a one-shot button; it\'s iteration, and the data is what you iterate on.</p>` },
+          <p>Every lesson of Foundations comes due here. Hold out a <strong>validation set</strong> your fine-tune never trains on, and judge success there — not on the training examples, where a memorizing model looks perfect and generalizes terribly.</p>
+          <p>And evaluate on what you actually care about: does it beat a good prompt on the <em>base</em> model? (Sometimes it doesn\'t — always check.) Fine-tuning isn\'t a one-shot button; it\'s iteration, and the data is what you iterate on.</p>` },
+        { t: 'widget', name: 'order', title: 'Order the fine-tuning workflow', md: `<p>Sequence the loop you actually run in practice.</p>`,
+          items: [
+            'Curate a clean, representative dataset of examples',
+            'Fine-tune with LoRA on that dataset',
+            'Evaluate on held-out data the model never trained on',
+            'Find and analyze the failures',
+            'Improve the data based on what failed',
+            'Repeat the loop',
+          ] },
         { t: 'quiz',
           q: 'Why must you evaluate a fine-tuned model on held-out examples it never trained on?',
           opts: [

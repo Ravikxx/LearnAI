@@ -15,8 +15,8 @@ COURSES.push({
       minutes: 9,
       steps: [
         { t: 'text', title: 'The model proposes; your code disposes', md: `
-          <p>A raw LLM can only emit text. It can\'t check the weather, query a database, or send an email. <strong>Tool use</strong> (function calling) fixes this — but in a way people constantly misunderstand.</p>
-          <p>You describe the available tools to the model. When it wants one, it does <em>not</em> run anything. It outputs a structured request — just tokens — like <code>get_weather(city="Oslo")</code>. Your surrounding program reads that, actually executes the function, and feeds the result back into the context. The model then continues with real data in hand.</p>
+          <p>A raw LLM can only emit text — it can\'t check the weather, query a database, or send an email. <strong>Tool use</strong> (function calling) fixes this, in a way people constantly misunderstand.</p>
+          <p>You describe the available tools to the model. When it wants one, it does <em>not</em> run anything — it outputs a structured request, just tokens, like <code>get_weather(city="Oslo")</code>. Your surrounding program reads that, actually executes the function, and feeds the result back into the context.</p>
           <div class="callout">💡 The division of labor is the whole safety story of agents: <strong>the model decides what to call; your code decides what actually runs.</strong> The model never touches your systems directly.</div>` },
         { t: 'quiz',
           q: 'When an LLM "calls a tool," what does the model itself actually produce?',
@@ -27,9 +27,19 @@ COURSES.push({
           ],
           a: 1,
           why: 'The model only ever emits tokens — here, tokens describing which tool and which arguments. A harness around the model does the real execution. This propose-vs-execute split is exactly why you can sandbox, validate, and refuse an agent\'s requested actions before they happen.' },
+        { t: 'widget', name: 'classify', title: 'Model decision, or code action?', md: `<p>Sort each thing that happens during a tool call into who actually does it.</p>`,
+          buckets: ['Model proposes', 'Your code executes'],
+          items: [
+            ['Deciding to call get_weather(city="Oslo")', 0],
+            ['Writing the JSON naming the tool and its arguments', 0],
+            ['Choosing which arguments to pass to a tool', 0],
+            ['Sending the actual HTTP request to the weather API', 1],
+            ['Running the SQL query against the real database', 1],
+            ['Validating a request against the schema before running it', 1],
+          ] },
         { t: 'text', title: 'Structured output is the glue', md: `
-          <p>For your code to act on the model\'s request, the request has to be <em>parseable</em> — usually JSON matching a schema you defined. "Return a JSON object with keys <code>tool</code> and <code>arguments</code>." Modern models are specifically trained to emit reliable structured output for exactly this reason.</p>
-          <p>Recall the temperature dial from the LLM course: for tool calls you want <strong>low temperature</strong>, so the model reliably produces clean, valid, parseable requests rather than creative variations that break your parser.</p>` },
+          <p>For your code to act, the model\'s request has to be <em>parseable</em> — usually JSON matching a schema you defined. Modern models are specifically trained to emit reliable structured output for exactly this reason.</p>
+          <p>Recall the temperature dial from the LLM course: for tool calls you want <strong>low temperature</strong>, so the model reliably produces clean, valid requests rather than creative variations that break your parser.</p>` },
         { t: 'quiz',
           q: 'Why do agent builders usually run the model at low temperature when it\'s deciding tool calls?',
           opts: [
@@ -54,7 +64,14 @@ COURSES.push({
             <li><strong>Observe</strong> — your code runs the tool and adds the result to the context.</li>
             <li><strong>Repeat</strong> — the model reasons over the new information, until the goal is met, then answers.</li>
           </ol>
-          <p>This is how a coding assistant reads files, runs tests, sees the failures, and fixes them — looping until the tests pass. It\'s chain-of-thought with the power to actually <em>do</em> things and see what happens.</p>` },
+          <p>This is how a coding assistant reads files, runs tests, sees the failures, and fixes them — looping until the tests pass.</p>` },
+        { t: 'widget', name: 'order', title: 'Put the ReAct loop in order', md: `<p>You just read the four steps — now sequence them from scratch.</p>`,
+          items: [
+            'Think — reason about what to do next',
+            'Act — propose a tool call',
+            'Observe — run the tool and add the result to context',
+            'Repeat — reason over the new information until the goal is met',
+          ] },
         { t: 'quiz',
           q: 'What makes an agent more capable than a single LLM call, even with the identical underlying model?',
           opts: [
@@ -65,8 +82,8 @@ COURSES.push({
           a: 1,
           why: 'Same model, more structure. By alternating action and observation, the agent replaces one big blind guess with a feedback loop — try, see the actual result, correct. That loop is what lets it handle open-ended, multi-step tasks a one-shot answer can\'t.' },
         { t: 'text', title: 'Why observation is the magic ingredient', md: `
-          <p>Notice what the <em>observe</em> step buys you: it repeatedly injects <strong>ground truth</strong> into the context. Without tools, an LLM asked "does this code work?" can only guess plausibly. An agent <em>runs</em> the code and reads the actual error — no guessing. Each observation replaces speculation with fact.</p>
-          <p>This is also why agents partially sidestep hallucination on tasks with a checkable result: the environment corrects the model. The model can propose something wrong, but the observation reveals it was wrong, and the next reasoning step can recover.</p>` },
+          <p>The <em>observe</em> step repeatedly injects <strong>ground truth</strong> into the context. Without tools, an LLM asked "does this code work?" can only guess plausibly. An agent <em>runs</em> the code and reads the actual error — no guessing.</p>
+          <p>This is also why agents partially sidestep hallucination on tasks with a checkable result: the model can propose something wrong, but the observation reveals it, and the next reasoning step can recover.</p>` },
         { t: 'quiz',
           q: 'How does the "observe" step help with hallucination on a task like debugging code?',
           opts: [
@@ -86,8 +103,8 @@ COURSES.push({
         { t: 'text', title: 'Two kinds of memory', md: `
           <p>A long-running agent needs to remember things — but the context window is finite (recall the capstone\'s n² cost). So agents use two tiers:</p>
           <ul>
-            <li><strong>Short-term memory</strong> — the working context: the conversation and recent observations. Fast to access, but limited and expensive as it grows.</li>
-            <li><strong>Long-term memory</strong> — an external store the agent can write to and search later, typically a <em>vector database</em> (the embeddings + retrieval machinery from the RAG lesson). Facts, past results, and learned preferences live here and get pulled back in when relevant.</li>
+            <li><strong>Short-term memory</strong> — the working context: the conversation and recent observations. Fast, but limited and expensive as it grows.</li>
+            <li><strong>Long-term memory</strong> — an external store the agent writes to and searches later, typically a <em>vector database</em> (the embeddings + retrieval machinery from the RAG lesson).</li>
           </ul>
           <p>So "agent memory" is usually just RAG pointed at the agent\'s own history — retrieve the relevant past, drop it into the context when needed.</p>` },
         { t: 'quiz',
@@ -101,7 +118,7 @@ COURSES.push({
           why: 'Weights are frozen at inference. Long-term memory is external: the agent saves information to a store and later retrieves it (semantic search over embeddings) back into the working context. It\'s the same RAG idea, applied to the agent\'s own accumulated experience.' },
         { t: 'text', title: 'Planning: breaking a big task into small ones', md: `
           <p>Complex goals ("research these five competitors and write a comparison") are too big for one step. Agents handle this with <strong>task decomposition</strong>: the model breaks the goal into subgoals, tackles them one at a time, and assembles the results. Some designs add a <strong>reflection</strong> step — the agent critiques its own progress and revises the plan.</p>
-          <p>This works because you already have the pieces: chain-of-thought to reason about a plan, tools to execute each sub-step, and memory to hold results across steps. Planning is those capabilities aimed at structure.</p>` },
+          <p>This works because you already have the pieces: chain-of-thought to reason about a plan, tools to execute each sub-step, and memory to hold results across steps.</p>` },
         { t: 'quiz',
           q: 'What is "task decomposition" in an agent?',
           opts: [
@@ -111,6 +128,15 @@ COURSES.push({
           ],
           a: 1,
           why: 'Decomposition turns one intractable step into a sequence of manageable ones — plan, solve each subgoal (often with tools), assemble. It leans on reasoning, tool use, and memory together, which is why agents can attempt tasks far larger than a single prompt could handle.' },
+        { t: 'widget', name: 'match', title: 'Match the concept to its definition', md: `<p>A quick recap of this lesson\'s vocabulary.</p>`,
+          pairs: [
+            ['Short-term memory', 'The working context: the conversation and recent observations'],
+            ['Long-term memory', 'An external store (e.g. a vector DB) the agent writes to and searches later'],
+            ['Task decomposition', 'Breaking a big goal into smaller subgoals tackled one at a time'],
+            ['Reflection', 'The agent critiques its own progress and revises the plan'],
+            ['Vector database', 'Where embeddings are stored and searched by similarity'],
+            ['Agent memory as RAG', 'Retrieving the relevant past and dropping it back into context when needed'],
+          ] },
       ],
     },
     {
@@ -119,8 +145,8 @@ COURSES.push({
       minutes: 10,
       steps: [
         { t: 'text', title: 'Errors compound', md: `
-          <p>Agents inherit a brutal math problem. If each step is 95% reliable, a 20-step task succeeds only about <code>0.95²⁰ ≈ 36%</code> of the time — because errors <em>multiply</em>. One wrong observation or hallucinated tool call can send the whole chain off course, and later steps build on the mistake.</p>
-          <p>This is the central challenge of agents: individual steps are good, but reliability decays fast over long chains. It\'s why production agents lean heavily on checkpoints, validation, retries, and keeping chains as short as possible.</p>` },
+          <p>Agents inherit a brutal math problem. If each step is 95% reliable, a 20-step task succeeds only about <code>0.95²⁰ ≈ 36%</code> of the time — because errors <em>multiply</em>. One wrong observation or hallucinated tool call can send the whole chain off course.</p>
+          <p>This is the central challenge of agents: individual steps are good, but reliability decays fast over long chains. It\'s why production agents lean on checkpoints, validation, retries, and keeping chains as short as possible.</p>` },
         { t: 'quiz',
           q: 'Why do long agent chains become unreliable even when each individual step is usually correct?',
           opts: [
@@ -148,6 +174,18 @@ COURSES.push({
           ],
           a: 1,
           why: 'The model proposes; your code disposes — and for irreversible actions your code should not rubber-stamp. Human-in-the-loop or strict validation on high-stakes calls contains the damage from a single confident mistake. Autonomy is fine for reversible steps; gate the ones you can\'t undo.' },
+        { t: 'widget', name: 'classify', title: 'Auto-execute, or require approval?', md: `<p>Sort each action by how it should be handled.</p>`,
+          buckets: ['Safe to auto-execute', 'Should require human approval'],
+          items: [
+            ['Formatting a code file', 0],
+            ['Answering a read-only database query', 0],
+            ['Adding two numbers with a calculator tool', 0],
+            ['Fetching today\'s weather forecast', 0],
+            ['Sending a marketing email to 50,000 subscribers', 1],
+            ['Deleting a production database table', 1],
+            ['Transferring $10,000 between bank accounts', 1],
+            ['Issuing a customer refund over $500', 1],
+          ] },
         { t: 'text', title: '🎓 You can build an agent now', md: `
           <p>You understand what turns a chatbot into an actor:</p>
           <ul>
