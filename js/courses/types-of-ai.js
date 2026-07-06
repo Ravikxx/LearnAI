@@ -258,16 +258,16 @@ COURSES.push({
       minutes: 12,
       steps: [
         { t: 'text', title: 'A model that knows no words', md: `
-          <p>Now the type you were most curious about — and it\'s the most different. A game-playing agent (think the AI that mastered chess, Go, or Atari) has never read a book. It doesn\'t know English, or any language. Yet it beats world champions. How?</p>
+          <p>Now the type you were most curious about — and the most different. A game-playing agent (chess, Go, Atari) has never read a book. It doesn\'t know English, or any language. Yet it beats world champions. How?</p>
           <p>It learns by <strong>reinforcement learning (RL)</strong>: not from labeled answers, but from <em>trial, error, and reward</em>. It plays, gets a score signal (won/lost, points up/down), and gradually adjusts to earn more reward. Nobody tells it the right move — it discovers moves that tend to win.</p>` },
         { t: 'text', title: 'What actually goes in and out', md: `
           <p>Keep the edges idea from lesson 1. For a game agent:</p>
           <ul>
-            <li><strong>Input (the observation)</strong> — the game state as numbers: the board encoded as a grid, or the raw screen pixels. Numbers, as always.</li>
-            <li><strong>The network</strong> — maps that observation to an output. This mapping is called the <strong>policy</strong>.</li>
-            <li><strong>Output (the action)</strong> — a few numbers, one per possible move. Say four outputs for up/down/left/right. The environment simply picks the move whose output number is largest.</li>
+            <li><strong>Input (observation)</strong> — the game state as numbers: a board grid, or raw screen pixels.</li>
+            <li><strong>The network</strong> — maps that observation to an output. This mapping is the <strong>policy</strong>.</li>
+            <li><strong>Output (action)</strong> — one number per possible move (say four, for up/down/left/right). The environment picks the move whose output is largest.</li>
           </ul>
-          <p>So the agent "chooses a move" by outputting numbers and letting the game read off the biggest one. It\'s the same numbers-in-numbers-out machine — pointed at a game.</p>` },
+          <p>The agent "chooses a move" by outputting numbers and letting the game read off the biggest one — the same numbers-in-numbers-out machine, pointed at a game.</p>` },
         { t: 'quiz',
           q: 'Your core question: how can this agent "output a move" if it doesn\'t know what a number or a move even is?',
           opts: [
@@ -278,8 +278,8 @@ COURSES.push({
           a: 1,
           why: 'This is lesson 1 paying off. The network doesn\'t know it\'s playing a game or that its outputs are "moves" — it emits raw numbers, and the environment is wired so that output-slot 2 means "move left." Meaning is entirely external. "Not knowing what a number is" was never a problem, because knowing was never required.' },
         { t: 'text', title: 'Learning with no teacher: self-play', md: `
-          <p>Where do good moves come from with no answer key? For games like Go, the trick is <strong>self-play</strong>: the agent plays millions of games <em>against itself</em>. Wins nudge the moves that led to them upward; losses nudge them down. Over millions of games it bootstraps from random flailing to superhuman skill — and because it isn\'t copying human games, it invents strategies no human taught it (AlphaGo\'s famous "move 37" stunned professionals).</p>
-          <p>The reward is the entire teacher. Design the reward well and the agent finds clever ways to earn it; design it carelessly and it finds clever ways to <em>cheat</em> it — the reward-hacking problem from the AI Safety course.</p>` },
+          <p>Where do good moves come from with no answer key? For games like Go, the trick is <strong>self-play</strong>: the agent plays millions of games <em>against itself</em>. Wins nudge the moves that led to them upward; losses nudge them down. It bootstraps from random flailing to superhuman skill — and because it isn\'t copying human games, it invents strategies no human taught it (AlphaGo\'s famous "move 37" stunned professionals).</p>
+          <p>The reward is the entire teacher. Design it well and the agent finds clever ways to earn it; design it carelessly and it finds clever ways to <em>cheat</em> it — the reward-hacking problem from the AI Safety course.</p>` },
         { t: 'widget', name: 'rlagent', title: 'Try it: watch an agent learn from reward', md: `
           <p>This agent knows nothing — no map, no language, no idea what "left" means. Press <strong>Train</strong> and watch it learn purely from reward (★ = +1, ✕ = −1): the grid turns green where it discovers value, and arrows show the policy it forms. Then hit <strong>Run agent</strong> to watch it walk the path it taught itself.</p>` },
         { t: 'quiz',
@@ -308,8 +308,8 @@ COURSES.push({
       minutes: 10,
       steps: [
         { t: 'text', title: 'One model, many senses', md: `
-          <p>The newest flagship models refuse to stay in one lane. A <strong>multimodal model</strong> (GPT-4o, Gemini, Claude) can take text, images, and audio together and respond across modalities — look at a photo and discuss it, hear a question and speak an answer, read a chart and explain it.</p>
-          <p>The trick is beautifully consistent with everything you\'ve learned: give the model several encoders — one for text, one for images, one for audio — that all translate their modality into the <em>same</em> internal number-space. Once everything is numbers in a shared space, one Transformer processes them together, indifferent to where each came from.</p>` },
+          <p>The newest flagship models refuse to stay in one lane. A <strong>multimodal model</strong> (GPT-4o, Gemini, Claude) takes text, images, and audio together and responds across modalities — look at a photo and discuss it, hear a question and speak an answer, read a chart and explain it.</p>
+          <p>The trick: give the model several encoders — one per modality — that all translate into the <em>same</em> internal number-space. Once everything is numbers in a shared space, one Transformer processes them together, indifferent to where each came from.</p>` },
         { t: 'quiz',
           q: 'How does a single model handle both images and text at once?',
           opts: [
@@ -319,6 +319,13 @@ COURSES.push({
           ],
           a: 1,
           why: 'Unify at the number level: text-encoder and image-encoder both output vectors in one common space, so the core model reasons over them jointly. This is the payoff of "everything is numbers" — once modalities share a numeric language, mixing them is natural.' },
+        { t: 'widget', name: 'order', title: 'Try it: order how a multimodal prompt gets processed', items: [
+          "The text encoder converts the prompt's words into vectors",
+          "The image encoder converts the photo's pixels into vectors in that same space",
+          'The text and image vectors are combined into one sequence',
+          'The shared Transformer processes the combined sequence jointly',
+          'A decoder turns the output vectors back into words (or speech, or an image)',
+        ], md: `<p>Ask GPT-4o about a photo, and this is what actually happens under the hood. Click the steps into order.</p>` },
         { t: 'text', title: 'The whole zoo, and where it\'s heading', md: `
           <p>You now have the map. The "types" you\'ll see listed are mostly defined by <em>which modality goes in and which comes out</em>:</p>
           <ul>
@@ -330,7 +337,7 @@ COURSES.push({
             <li><strong>Game/RL agent</strong> — observation → action, taught by reward</li>
             <li><strong>Multimodal</strong> — several at once, in a shared space</li>
           </ul>
-          <p>A few more you may meet: <strong>robotics/action models</strong> (camera + goal → motor commands — RL and vision, embodied), <strong>time-series/forecasting</strong> models (past numbers → future numbers), and <strong>recommendation</strong> models (your behavior → what you\'ll like). Same recipe every time.</p>` },
+          <p>A few more you may meet: <strong>robotics/action models</strong> (camera + goal → motor commands), <strong>time-series/forecasting</strong> models (past numbers → future numbers), and <strong>recommendation</strong> models (your behavior → what you\'ll like). Same recipe every time.</p>` },
         { t: 'quiz',
           q: 'What\'s the single biggest takeaway tying all these "types" together?',
           opts: [

@@ -1044,7 +1044,7 @@ WIDGETS.classify = (el, step) => {
     b.onclick = () => {
       if (selected == null) return;
       const chip = itemEls[selected];
-      if (items[selected].label && !chip.disabled) {
+      if (!chip.disabled) {
         if (items[selected][1] === buckets.indexOf(name)) {
           chip.classList.remove('sel'); chip.classList.add('placed');
           chip.disabled = true;
