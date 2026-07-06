@@ -174,7 +174,7 @@ COURSES.push({
             <li><strong>Diffusion</strong> — learn to un-noise; turn static into images, one steady step at a time</li>
             <li><strong>Text-to-image</strong> — condition every step on the prompt; compress to a latent for speed</li>
           </ul>
-          <p>Next up: <strong>AI Safety &amp; Alignment</strong> — as these systems get more capable, how do we make sure they do what we actually want?</p>` },
+          <p>Next up: <strong>Reinforcement Learning</strong> — from models that create to agents that learn by trial, error, and reward.</p>` },
       ],
     },
   ],

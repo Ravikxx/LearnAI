@@ -11,11 +11,15 @@ Interactive, Brilliant-style lessons on how AI actually works — free, no build
 2. **Neural Networks** — neurons, activations, layers, backprop, and a real XOR network you train live
 3. **How LLMs Work** — tokens, embeddings, attention, next-token prediction, RLHF
 4. **Getting the Most from LLMs** — prompting, few-shot & chain-of-thought, RAG, and agents
-5. **Generative AI & Diffusion** — generative vs discriminative, GANs, diffusion, and text-to-image
-6. **AI Safety & Alignment** — the alignment problem, reward hacking, bias, interpretability, dual use
-7. **Putting It All Together** — advanced synthesis capstone: cross-entropy & perplexity, scaling laws (Chinchilla, 6ND), emergence, the RLHF objective, attention's n² cost & the KV cache, and the frontier
-8. **Python & PyTorch** — tensors, autograd, the training loop, and a real MNIST classifier
-9. **Computer Vision with PyTorch** — convolutions, CNNs, and transfer learning
+5. **AI Agents & Tool Use** — tool calling, the ReAct loop, memory, planning, and how agents break
+6. **Generative AI & Diffusion** — generative vs discriminative, GANs, diffusion, and text-to-image
+7. **Reinforcement Learning** — reward, value & Q-learning, deep RL, self-play, and reward hacking
+8. **Recommender Systems** — collaborative filtering, matrix factorization, ranking, and filter bubbles
+9. **AI Safety & Alignment** — the alignment problem, reward hacking, bias, interpretability, dual use
+10. **Putting It All Together** — advanced synthesis capstone: cross-entropy & perplexity, scaling laws (Chinchilla, 6ND), emergence, the RLHF objective, attention's n² cost & the KV cache, and the frontier
+11. **Python & PyTorch** — tensors, autograd, the training loop, and a real MNIST classifier
+12. **Computer Vision with PyTorch** — convolutions, CNNs, and transfer learning
+13. **Fine-tuning Your Own Model** — prompt vs RAG vs fine-tune, catastrophic forgetting, LoRA/PEFT, and honest evaluation
 
 ## Features
 

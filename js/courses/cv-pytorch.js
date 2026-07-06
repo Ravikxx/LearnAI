@@ -226,7 +226,7 @@ model.fc = nn.Linear(model.fc.in_features, 3)  # new head: 3 classes</code></pre
             <li><strong>Building one</strong> — <code>nn.Conv2d</code>, pooling, and the same old training loop</li>
             <li><strong>Transfer learning</strong> — stand on a pretrained model to win with little data</li>
           </ul>
-          <p>You now hold a full arc: from what "learning" means, through neural nets, LLMs, using and generating with them, their safety, and building vision models in PyTorch. Go make something. 🚀</p>` },
+          <p>One course left: <strong>Fine-tuning Your Own Model</strong> — the finale, where you take a powerful pretrained model and make it yours with LoRA. It ties the entire journey together.</p>` },
       ],
     },
   ],

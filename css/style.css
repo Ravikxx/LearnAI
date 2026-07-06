@@ -18,6 +18,10 @@
   --series-8: #eb6834;  /* orange */
   --series-9: #0e97b0;  /* cyan */
   --series-10: #4f46e5; /* indigo */
+  --series-11: #0d9488; /* teal */
+  --series-12: #5c8a08; /* lime */
+  --series-13: #7c3aed; /* purple */
+  --series-14: #a1620a; /* amber */
   --good: #0ca30c;
   --good-text: #006300;
   --bad: #d03b3b;
@@ -45,6 +49,10 @@
     --series-8: #d95926;
     --series-9: #26bcd4;
     --series-10: #818cf8;
+    --series-11: #2dd4bf;
+    --series-12: #a3e635;
+    --series-13: #a78bfa;
+    --series-14: #d99a2b;
     --good: #0ca30c;
     --good-text: #0ca30c;
     --shadow: 0 1px 3px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);

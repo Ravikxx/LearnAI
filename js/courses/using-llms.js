@@ -203,7 +203,7 @@ COURSES.push({
             <li><strong>RAG</strong> — turn a memory test into an open-book test</li>
             <li><strong>Agents</strong> — give the model tools and a think–act–observe loop</li>
           </ul>
-          <p>Next up: <strong>Generative AI &amp; Diffusion</strong> — how the same deep-learning ideas produce images, not just text.</p>` },
+          <p>Next up: <strong>AI Agents &amp; Tool Use</strong> — you just met the agent loop in miniature; next you'll see the full picture of models that plan and act.</p>` },
       ],
     },
   ],
