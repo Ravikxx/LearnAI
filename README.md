@@ -6,6 +6,7 @@ Interactive, Brilliant-style lessons on how AI actually works — free, no build
 
 ## Courses
 
+0. **The Many Kinds of AI** — a no-prerequisites survey of every model type: text, image, audio, video, embeddings, and game-playing agents, and the one idea (numbers in, numbers out) that unites them
 1. **AI Foundations** — what "learning" means: features & labels, loss, gradient descent, overfitting
 2. **Neural Networks** — neurons, activations, layers, backprop, and a real XOR network you train live
 3. **How LLMs Work** — tokens, embeddings, attention, next-token prediction, RLHF
