@@ -31,7 +31,7 @@ COURSES.push({
           ['Turning an image into pixel brightness values', 0],
           ['Turning a grid of output numbers into a displayed image', 1],
           ['Turning sound into air-pressure samples', 0],
-          ["Turning an output number into \\'move the paddle up\\'", 1],
+          ["Turning an output number into 'move the paddle up'", 1],
         ], md: `<p>Every model has these two translators bolted onto its ends. Sort each job by which side it belongs on.</p>` },
         { t: 'quiz',
           q: 'In one sentence: what actually distinguishes an "image model" from a "text model"?',
@@ -60,8 +60,7 @@ COURSES.push({
       steps: [
         { t: 'text', title: 'Words in, words out', md: `
           <p>The type you know best. A <strong>text model</strong> (a Large Language Model, or LLM) takes text and produces text: chat, code, summaries, translation, answers.</p>
-          <p>Following the edges idea: your text is encoded into <strong>tokens</strong> (word-pieces, each with an ID number), the network processes those numbers, and it outputs a probability for every possible next token. The decoder picks one, appends it, and the loop runs again — that\'s the text streaming onto your screen.</p>
-          <p>On a model menu these are labeled "text" or "chat." Everything they do is that one trick: predict the next token, over and over.</p>` },
+          <p>Your text is encoded into <strong>tokens</strong> (word-pieces with ID numbers), the network processes those numbers, and it outputs a probability for every possible next token. The decoder picks one, appends it, and the loop runs again — that\'s the text streaming onto your screen.</p>` },
         { t: 'widget', name: 'tokenizer', title: 'Try it: how text becomes numbers', md: `
           <p>This is the encoder from lesson 1, made concrete. Type anything and watch it get chopped into tokens — the numbers a text model actually reads. Common words stay whole; rare ones shatter into pieces.</p>` },
         { t: 'quiz',
@@ -75,7 +74,16 @@ COURSES.push({
           why: 'One token at a time is the entire mechanism. No templates, no lookup — each token is a fresh prediction conditioned on everything so far. (The "How LLMs Work" course takes this apart in detail if you want the deep version.)' },
         { t: 'text', title: 'Where text models shine and struggle', md: `
           <p>Because they model language statistically, text models are brilliant at anything language-shaped — drafting, explaining, coding, rephrasing — and shaky where fluent-sounding isn\'t the same as correct: exact arithmetic, obscure facts, counting letters in a word.</p>
-          <p>Keep the modality lens: a text model\'s world is <em>tokens</em>. It has never seen a pixel or heard a sound. To handle those, you need a different type — or a multimodal model that bolts on extra encoders, which we\'ll reach at the end.</p>` },
+          <p>A text model\'s world is <em>tokens</em> — it has never seen a pixel or heard a sound. For those, you need a different type, or a multimodal model that bolts on extra encoders (we\'ll reach that at the end).</p>` },
+        { t: 'quiz',
+          q: 'Text models are excellent at rephrasing a paragraph but shakier at exact arithmetic. Why?',
+          opts: [
+            'Arithmetic uses a different programming language internally',
+            'The model is optimized to predict plausible-sounding tokens, not to compute — fluent phrasing and exact correctness are not the same target',
+            'Text models have never been shown any numbers',
+          ],
+          a: 1,
+          why: 'Predicting the next token well correlates strongly with fluent, sensible language, but only loosely with getting an exact computation right. That gap between "sounds right" and "is right" is why calculators and code execution often beat raw next-token prediction on precise math.' },
       ],
     },
     {
@@ -84,8 +92,8 @@ COURSES.push({
       minutes: 10,
       steps: [
         { t: 'text', title: 'The type that outputs a vector, not words', md: `
-          <p>Here\'s the one that puzzled you on OpenRouter. An <strong>embedding model</strong> takes text (or an image, or audio) and outputs a single fixed list of numbers — a <strong>vector</strong>, maybe 768 or 1,536 numbers long. It does <em>not</em> output words. That vector is a numeric fingerprint of the input\'s <em>meaning</em>.</p>
-          <p>The rule that makes it useful: <strong>similar meanings get similar vectors.</strong> "How do I cancel my subscription?" and "I want to end my plan" land at nearly the same coordinates, even though they share almost no words. "Photosynthesis" lands far away.</p>
+          <p>Here\'s the one that puzzled you on OpenRouter. An <strong>embedding model</strong> takes text (or an image, or audio) and outputs a single fixed list of numbers — a <strong>vector</strong>, maybe 768 or 1,536 numbers long. It does <em>not</em> output words; the vector is a numeric fingerprint of the input\'s <em>meaning</em>.</p>
+          <p>The rule that makes it useful: <strong>similar meanings get similar vectors.</strong> "How do I cancel my subscription?" and "I want to end my plan" land at nearly the same coordinates, despite sharing almost no words. "Photosynthesis" lands far away.</p>
           <div class="callout">💡 A chat model answers your text. An embedding model measures your text — turning it into coordinates you can compare, sort, and search. Different job, different output type.</div>` },
         { t: 'widget', name: 'embeddings', title: 'Try it: meaning as coordinates', md: `
           <p>An embedding model turns each input into a point like these. Click a word to see its nearest neighbors — the ones an embedding model would judge closest in meaning. Similar things sit close together; that proximity is the entire product.</p>` },
@@ -102,12 +110,12 @@ COURSES.push({
           <p>Turning meaning into comparable coordinates quietly powers a huge amount of software:</p>
           <ul>
             <li><strong>Semantic search</strong> — embed your query and every document; return the nearest ones. Search by meaning, not keywords.</li>
-            <li><strong>RAG</strong> — the retrieval step that finds relevant docs to feed a chatbot runs on embeddings.</li>
+            <li><strong>RAG</strong> — the retrieval step that feeds a chatbot relevant docs runs on embeddings.</li>
             <li><strong>Recommendations</strong> — "similar to what you liked" = nearby vectors.</li>
-            <li><strong>Clustering &amp; deduplication</strong> — group items by proximity; spot near-duplicates.</li>
-            <li><strong>Classification</strong> — a cheap classifier on top of embeddings sorts support tickets, flags spam, tags topics.</li>
+            <li><strong>Clustering &amp; deduplication</strong> — group by proximity; spot near-duplicates.</li>
+            <li><strong>Classification</strong> — a cheap classifier on top of embeddings sorts tickets, flags spam, tags topics.</li>
           </ul>
-          <p>They\'re listed separately from chat models because they\'re smaller, faster, and cheaper — you\'d call one millions of times to index a library, where a full chat model would be overkill and far too slow.</p>` },
+          <p>They\'re a separate product because they\'re smaller, faster, and cheaper — you\'d call one millions of times to index a library, where a full chat model would be overkill.</p>` },
         { t: 'quiz',
           q: 'Why offer an embedding model as its own product instead of just using a chat model?',
           opts: [
@@ -125,12 +133,12 @@ COURSES.push({
       minutes: 9,
       steps: [
         { t: 'text', title: 'Two very different image jobs', md: `
-          <p>"Image AI" actually splits into two opposite directions, and it helps to keep them straight:</p>
+          <p>"Image AI" splits into two opposite directions:</p>
           <ul>
-            <li><strong>Image understanding</strong> — pixels in, an <em>answer</em> out. Is there a tumor? What breed is this dog? Where are the pedestrians? Describe this photo. The picture (a grid of numbers) is the input; a label or caption is the output.</li>
+            <li><strong>Image understanding</strong> — pixels in, an <em>answer</em> out. Is there a tumor? What breed is this dog? Where are the pedestrians? The picture is the input; a label or caption is the output.</li>
             <li><strong>Image generation</strong> — text in, <em>pixels</em> out. "A red fox in snow, oil painting." Here the picture is what the model produces.</li>
           </ul>
-          <p>Same modality, mirror-image data flow. On a menu you\'ll see understanding models under "vision" and generators under "image generation."</p>` },
+          <p>Same modality, mirror-image data flow. Menus label understanding models "vision" and generators "image generation."</p>` },
         { t: 'quiz',
           q: 'A self-driving car\'s system that spots pedestrians in camera frames is which kind of image model?',
           opts: [
@@ -141,9 +149,11 @@ COURSES.push({
           a: 1,
           why: 'The input is the image and the output is an interpretation — understanding, not generation. Generation goes the other way: a description in, a brand-new image out. Same pixels-as-numbers idea, opposite direction.' },
         { t: 'text', title: 'How each side works, briefly', md: `
-          <p><strong>Understanding</strong> leans on <em>convolutional networks</em> (or vision Transformers): small filters slide across the pixel grid detecting edges, then textures, then shapes, then objects — a learned hierarchy. (The "Computer Vision with PyTorch" course builds one.)</p>
-          <p><strong>Generation</strong> today mostly uses <em>diffusion</em>: start from pure random noise and repeatedly denoise it, steered by your text prompt, until an image emerges. (The "Generative AI &amp; Diffusion" course goes deep.)</p>
-          <p>Either way, an image is simply a 3-D block of numbers — height × width × 3 color channels — and the model reads or writes those numbers.</p>` },
+          <p><strong>Understanding</strong> leans on <em>convolutional networks</em> (or vision Transformers): small filters slide across the pixel grid, detecting edges, then textures, then shapes, then objects. (The "Computer Vision with PyTorch" course builds one.)</p>
+          <p><strong>Generation</strong> today mostly uses <em>diffusion</em>: start from random noise and repeatedly denoise it, steered by your text prompt, until an image emerges. (The "Generative AI &amp; Diffusion" course goes deep.)</p>
+          <p>Either way, an image is a 3-D block of numbers — height × width × 3 color channels — and the model reads or writes those numbers.</p>` },
+        { t: 'widget', name: 'diffusion', title: 'Try it: watch the generation direction, live', md: `
+          <p>This is the "text in, pixels out" direction from above. Start from noise, press <strong>Generate</strong>, and watch an image emerge step by step — the mirror image of what an understanding model does. (Want the mechanics of <em>why</em> this works? The Generative AI course goes deep.)</p>` },
         { t: 'quiz',
           q: 'In what sense is a color photo already "numbers" before any AI touches it?',
           opts: [
@@ -161,9 +171,9 @@ COURSES.push({
       minutes: 9,
       steps: [
         { t: 'text', title: 'Sound is a number too', md: `
-          <p>A microphone measures air pressure thousands of times a second; each measurement is a number. So a sound clip is just a long list of numbers (a waveform) — same story as pixels and tokens. That means audio gets its own family of models:</p>
+          <p>A microphone measures air pressure thousands of times a second; each measurement is a number. A sound clip is just a long list of numbers (a waveform) — same story as pixels and tokens. That gives audio its own family of models:</p>
           <ul>
-            <li><strong>Speech-to-text (transcription)</strong> — audio in, text out. This is Whisper, your phone\'s dictation, auto-captions.</li>
+            <li><strong>Speech-to-text (transcription)</strong> — audio in, text out. Whisper, phone dictation, auto-captions.</li>
             <li><strong>Text-to-speech (TTS)</strong> — text in, audio out. Voice assistants, audiobook narration, screen readers.</li>
             <li><strong>Audio/music generation</strong> — a prompt in, new sound out. AI-generated songs, sound effects, voices.</li>
           </ul>` },
@@ -176,9 +186,27 @@ COURSES.push({
           ],
           a: 1,
           why: 'Captions turn spoken audio into written text, so it\'s speech-to-text (transcription). Text-to-speech is the reverse — reading text aloud. Notice the pattern across the course: every "type" is defined by which modality is the input and which is the output.' },
+        { t: 'widget', name: 'classify', title: 'Try it: which audio model is this?', buckets: ['Speech → text', 'Text → speech', 'Prompt → new sound'], items: [
+          ['Auto-captioning a video', 0],
+          ['Transcribing a podcast episode', 0],
+          ["A voice assistant reading its reply aloud", 1],
+          ['Audiobook narration', 1],
+          ['A screen reader for visually impaired users', 1],
+          ['Generating background music for a video from a text description', 2],
+          ['Creating a sound effect that was never recorded', 2],
+        ], md: `<p>Sort each example by which direction the audio is flowing.</p>` },
         { t: 'text', title: 'The same engine, again', md: `
-          <p>You might expect audio to need something exotic. It largely doesn\'t. Whisper, for instance, is a <em>Transformer</em> — the very architecture behind ChatGPT — just with an encoder that reads sound instead of tokens. The sound is chopped into little chunks, turned into numbers, and the model predicts text tokens from them.</p>
-          <p>This is the quiet theme of modern AI: one flexible architecture, re-pointed at a new modality by changing its front door (the encoder) and its training data.</p>` },
+          <p>Audio doesn\'t need anything exotic. Whisper, for instance, is a <em>Transformer</em> — the same architecture behind ChatGPT — with an encoder that reads sound instead of tokens: the audio is chopped into chunks, turned into numbers, and the model predicts text tokens from them.</p>
+          <p>The quiet theme of modern AI: one flexible architecture, re-pointed at a new modality by changing its front door (the encoder) and its training data.</p>` },
+        { t: 'quiz',
+          q: 'Whisper is described as "a Transformer with a different encoder." What does that illustrate?',
+          opts: [
+            'Audio needed an entirely new kind of AI invented from scratch',
+            'The same core architecture generalizes across modalities — swap the encoder and training data, and a text-shaped machine reads sound instead',
+            'Transformers only work on text and Whisper is a rare exception',
+          ],
+          a: 1,
+          why: 'This is the through-line of the whole course: one adaptable architecture, re-pointed at a new modality by changing what feeds it numbers and what data it learns from. Audio, like text, image, and video, rides the same underlying machine.' },
       ],
     },
     {
@@ -187,12 +215,12 @@ COURSES.push({
       minutes: 9,
       steps: [
         { t: 'text', title: 'Images, but with a clock', md: `
-          <p>Video is just images in sequence — 24 or 30 still frames per second, each frame a grid of numbers. So <strong>video models</strong> inherit the image split:</p>
+          <p>Video is just images in sequence — 24 or 30 frames per second, each frame a grid of numbers. So <strong>video models</strong> inherit the image split:</p>
           <ul>
             <li><strong>Video understanding</strong> — frames in, an answer out: what action is happening, is this content unsafe, summarize this clip, find the moment someone scores.</li>
             <li><strong>Video generation</strong> — text (or a start image) in, a moving clip out: tools like Sora and Runway.</li>
           </ul>
-          <p>The new ingredient is <strong>time</strong>. The model can\'t treat each frame independently — it has to understand motion and keep things consistent across frames.</p>` },
+          <p>The new ingredient is <strong>time</strong>: the model can\'t treat each frame independently — it must understand motion and stay consistent across frames.</p>` },
         { t: 'quiz',
           q: 'What extra challenge does video add compared to a single image?',
           opts: [
@@ -202,8 +230,17 @@ COURSES.push({
           ],
           a: 1,
           why: 'A one-second clip is dozens of images that must agree with each other — a generated character can\'t change shirt color between frames, and a face must move naturally. That temporal consistency, plus the sheer volume of pixels-over-time, is why video is the most compute-hungry modality here.' },
+        { t: 'widget', name: 'classify', title: 'Try it: understanding or generation?', buckets: ['Video understanding (frames → answer)', 'Video generation (text/image → clip)'], items: [
+          ['Detecting the moment a goal is scored in a match', 0],
+          ['Flagging unsafe content in a clip', 0],
+          ['Summarizing a long video into a paragraph', 0],
+          ['Classifying the action happening in a clip', 0],
+          ['Generating a moving clip from a text prompt', 1],
+          ['Animating a still photo into a short video', 1],
+          ['Creating a new scene no camera ever filmed', 1],
+        ], md: `<p>Same split as image models, one dimension harder. Sort each example.</p>` },
         { t: 'text', title: 'Why video generation feels newer', md: `
-          <p>Convincing text-to-video arrived years after text-to-image for concrete reasons: many times more numbers to produce (every frame is a full image), a hard demand for temporal coherence (no flickering, no objects morphing), and much scarcer high-quality training data. It\'s the same diffusion-style ideas as images, scaled up and taught to respect time — which is a genuinely harder problem, not just a bigger one.</p>` },
+          <p>Convincing text-to-video arrived years after text-to-image for concrete reasons: far more numbers to produce (every frame is a full image), a hard demand for temporal coherence (no flickering, no objects morphing), and much scarcer high-quality training data. It\'s the same diffusion-style ideas as images, scaled up and taught to respect time — genuinely harder, not just bigger.</p>` },
         { t: 'quiz',
           q: 'Roughly why did believable AI video lag behind AI images?',
           opts: [
