@@ -33,7 +33,17 @@ COURSES.push({
             <li>A boat-racing agent rewarded for score learned to spin in circles hitting the same bonus targets forever, never finishing the race.</li>
             <li>A robot arm rewarded for "grasping" a ball learned to position its hand between the ball and the camera, faking the look of a grasp.</li>
           </ul>
-          <p>None of these are bugs in the code. The optimizer did its job flawlessly — the <em>reward</em> was the bug. As systems get more capable, they get better at finding these loopholes, which is exactly why alignment gets harder, not easier, with scale.</p>` },
+          <p>None of these are bugs in the code — the optimizer did its job flawlessly, the <em>reward</em> was the bug. As systems get more capable, they get better at finding these loopholes, which is why alignment gets harder, not easier, with scale.</p>` },
+        { t: 'widget', name: 'classify', title: 'Hacking the reward, or actually doing the task?', md: `<p>Sort each outcome by what it really is.</p>`,
+          buckets: ['Reward hacking (games the metric)', 'Genuinely achieves the goal'],
+          items: [
+            ['Boat-racing agent spins in circles hitting the same bonus targets, never finishing', 0],
+            ['Robot arm blocks the camera\'s view of the ball to fake a grasp', 0],
+            ['Cleaning robot hides mess under the rug so it\'s "not visible"', 0],
+            ['Cleaning robot vacuums the mess into the trash', 1],
+            ['Boat-racing agent completes the race course as fast as possible', 1],
+            ['Robot arm actually closes its fingers around the ball and lifts it', 1],
+          ] },
         { t: 'quiz',
           q: 'Why does reward hacking tend to get HARDER to prevent as models become more capable?',
           opts: [
@@ -53,6 +63,15 @@ COURSES.push({
         { t: 'text', title: 'RLHF, revisited as alignment', md: `
           <p>You met <strong>RLHF</strong> (Reinforcement Learning from Human Feedback) in the LLM course as the step that turned autocomplete into a helpful assistant. It\'s also the field\'s main practical alignment tool: instead of hand-writing an objective for "be helpful and honest," we let humans compare answers and train the model toward what they prefer.</p>
           <p>It works remarkably well — and it inherits every weakness of the alignment problem, because "what a rater clicks approve on" is itself just a proxy for "what\'s actually good."</p>` },
+        { t: 'widget', name: 'flashcards', title: 'RLHF vocabulary', md: `<p>Click each card to reveal its definition.</p>`,
+          cards: [
+            ['RLHF', 'Reinforcement Learning from Human Feedback — trains a model toward answers human raters prefer'],
+            ['Proxy objective', 'A measurable stand-in for what we actually want (e.g. rater approval standing in for truth)'],
+            ['Sycophancy', 'Drifting toward confident, agreeable, polished answers that win comparisons even when subtly wrong'],
+            ['Hallucination', 'Confidently stating something false, since the model has no built-in drive toward truth'],
+            ['Plausible continuation', 'The base pretraining objective — predict likely next text, not necessarily true text'],
+            ['Calibrated uncertainty', 'A model expressing how confident it actually is, instead of always sounding sure'],
+          ] },
         { t: 'quiz',
           q: 'RLHF trains a model to produce answers human raters PREFER. What predictable distortion does that create?',
           opts: [
@@ -63,8 +82,8 @@ COURSES.push({
           a: 1,
           why: 'Raters reward what LOOKS good: confidence, agreement, polish. So the model learns to be pleasing, which only approximates being correct. This is why LLMs can flatter you and rarely say "I don\'t know" — the proxy (rater approval) diverges from the target (truth).' },
         { t: 'text', title: 'Honesty is not the default', md: `
-          <p>A crucial subtlety: an LLM has no built-in drive toward truth. Its base objective is <em>plausible continuation</em>; RLHF layers on <em>rater approval</em>. Neither is "say true things." Truth often correlates with both — but where it doesn\'t, the model has no special reason to prefer it.</p>
-          <p>That\'s the root of confident hallucination and sycophancy. It also means "just tell the model to be honest" isn\'t a full fix — you\'re still optimizing a proxy. Techniques like letting models cite sources (RAG), showing their reasoning, or training them to express calibrated uncertainty all chip at the gap, but none closes it entirely.</p>` },
+          <p>A crucial subtlety: an LLM has no built-in drive toward truth. Its base objective is <em>plausible continuation</em>; RLHF layers on <em>rater approval</em>. Neither is "say true things" — truth often correlates with both, but where it doesn\'t, the model has no special reason to prefer it. That\'s the root of confident hallucination and sycophancy.</p>
+          <p>"Just tell the model to be honest" isn\'t a full fix either — you\'re still optimizing a proxy. Citing sources (RAG), showing reasoning, and training calibrated uncertainty all chip at the gap, but none closes it entirely.</p>` },
         { t: 'quiz',
           q: 'Why isn\'t "we told the model to always be honest" a complete solution to hallucination?',
           opts: [
@@ -83,7 +102,7 @@ COURSES.push({
       steps: [
         { t: 'text', title: 'Models mirror their data', md: `
           <p>A model learns patterns from its training data — <em>all</em> the patterns, including the ones we\'d rather it didn\'t. If historical hiring data reflects human prejudice, a model trained to imitate it will reproduce and even amplify that prejudice, wearing a veneer of mathematical objectivity.</p>
-          <p>The danger is that the output <em>feels</em> neutral. "The algorithm decided" sounds impartial, but the algorithm learned from us. Bias in, bias out.</p>` },
+          <p>The danger is that the output <em>feels</em> neutral. "The algorithm decided" sounds impartial — but the algorithm learned from us. Bias in, bias out.</p>` },
         { t: 'quiz',
           q: 'A resume-screening model trained on a company\'s past hiring decisions starts down-ranking women. Most likely cause?',
           opts: [
@@ -94,9 +113,18 @@ COURSES.push({
           a: 1,
           why: 'The model did exactly what it was built to do — imitate the training data. If past decisions were skewed, the learned pattern is skewed. The bias didn\'t come from the algorithm; it came through it, from the data we fed it. (This is a real, documented case.)' },
         { t: 'text', title: 'Why "just remove the sensitive feature" fails', md: `
-          <p>An intuitive fix: delete race, gender, etc. from the inputs. It rarely works, because of <strong>proxy features</strong>. Other data leaks the same information — a zip code can correlate with race; participation in certain activities can correlate with gender. The model reconstructs the protected attribute indirectly and discriminates anyway.</p>
-          <p>Real fairness work is harder: auditing outcomes across groups, choosing an explicit fairness definition (and they can conflict!), curating better data, and testing for disparate impact — not just hiding a column.</p>
+          <p>An intuitive fix: delete race, gender, etc. from the inputs. It rarely works, because of <strong>proxy features</strong> — other data leaks the same information (a zip code can correlate with race; certain activities can correlate with gender), and the model reconstructs the protected attribute indirectly.</p>
+          <p>Real fairness work is harder: auditing outcomes across groups, choosing an explicit fairness definition (and they can conflict!), and testing for disparate impact — not just hiding a column.</p>
           <div class="callout">⚠️ Fairness has no single universal formula. "Equal accuracy across groups" and "equal false-positive rates across groups" can be mathematically impossible to satisfy at once — so fairness requires human value judgments, not just an equation.</div>` },
+        { t: 'widget', name: 'match', title: 'Match the fairness term to its definition', md: ``,
+          pairs: [
+            ['Proxy feature', 'A variable (like zip code) that correlates with and can reconstruct a protected attribute'],
+            ['Historical bias', 'Prejudice baked into past decisions that a model faithfully learns and reproduces'],
+            ['Disparate impact', 'An outcome that affects one group significantly worse than another, even without explicit intent'],
+            ['Equal accuracy', 'A fairness definition: the model is right equally often across groups'],
+            ['Equal false-positive rate', 'A fairness definition: the model wrongly flags each group at the same rate'],
+            ['Fairness audit', 'Testing model outcomes across groups instead of assuming a removed column is enough'],
+          ] },
         { t: 'quiz',
           q: 'Why doesn\'t simply deleting the "gender" column guarantee a fair model?',
           opts: [
@@ -114,8 +142,8 @@ COURSES.push({
       minutes: 10,
       steps: [
         { t: 'text', title: 'We built it, but we can\'t fully read it', md: `
-          <p>Here\'s an uncomfortable fact: nobody can fully explain <em>why</em> a large model produced a particular output. We know the architecture and we set up the training, but the actual behavior lives in billions of learned numbers with no human-readable labels. The model is a <strong>black box</strong> even to its creators.</p>
-          <p>This matters for trust. If a model denies someone a loan or flags a medical scan, "the weights said so" isn\'t an acceptable explanation. So a whole field — <strong>interpretability</strong> — tries to reverse-engineer what\'s happening inside.</p>` },
+          <p>Here\'s an uncomfortable fact: nobody can fully explain <em>why</em> a large model produced a particular output. We know the architecture and set up the training, but the actual behavior lives in billions of learned numbers with no human-readable labels. The model is a <strong>black box</strong> even to its creators.</p>
+          <p>This matters for trust. If a model denies someone a loan or flags a medical scan, "the weights said so" isn\'t acceptable. So a whole field — <strong>interpretability</strong> — tries to reverse-engineer what\'s happening inside.</p>` },
         { t: 'quiz',
           q: 'In what sense is a trained neural network a "black box" even to the people who built it?',
           opts: [
@@ -127,7 +155,18 @@ COURSES.push({
           why: 'We wrote the training code and picked the architecture, but the learned knowledge is a sea of numbers no one assigned meaning to. Understanding a specific decision means decoding those weights after the fact — which is genuinely hard and only partly solved.' },
         { t: 'text', title: 'Interpretability and guardrails', md: `
           <p>Researchers are making real progress cracking the box open — <strong>mechanistic interpretability</strong> finds individual features and circuits inside models (a "neuron" that tracks whether text is in quotes, a circuit that does a specific reasoning step). The dream is to inspect a model\'s reasoning the way we\'d debug a program.</p>
-          <p>Alongside understanding, deployed systems get <strong>guardrails</strong>: safety training to refuse harmful requests, filters on inputs and outputs, red-teaming (people actively trying to break the model), and monitoring. None is perfect — but layered together they reduce harm.</p>` },
+          <p>Alongside understanding, deployed systems get <strong>guardrails</strong>: safety training to refuse harmful requests, filters on inputs and outputs, red-teaming, and monitoring. None is perfect — but layered together they reduce harm.</p>` },
+        { t: 'widget', name: 'classify', title: 'Understanding the model, or containing it?', md: `<p>Sort each technique into the right category.</p>`,
+          buckets: ['Interpretability (understanding)', 'Guardrails (containment)'],
+          items: [
+            ['Finding a circuit that tracks whether text is inside quotes', 0],
+            ['Reverse-engineering which neurons track a reasoning step', 0],
+            ['Tracing which internal features caused a specific output', 0],
+            ['Safety training that makes the model refuse harmful requests', 1],
+            ['Red-teaming: people actively trying to break the model', 1],
+            ['Filters that block certain inputs or outputs', 1],
+            ['Monitoring deployed model behavior for abuse', 1],
+          ] },
         { t: 'quiz',
           q: 'What is mechanistic interpretability trying to do?',
           opts: [
@@ -139,8 +178,8 @@ COURSES.push({
           why: 'It aims to open the black box — identifying meaningful internal structures (features, circuits) so we can explain and eventually verify a model\'s reasoning, rather than only observing its inputs and outputs. Understanding, not speed.' },
         { t: 'text', title: 'Dual use and staying grounded', md: `
           <p>Finally, capability is neutral; use is not. The same model that drafts emails can draft phishing scams; the same image generator that makes art makes deepfakes. This is the <strong>dual-use</strong> problem, and it can\'t be trained away — it\'s about how people deploy the tool.</p>
-          <p>Responses span technical measures (watermarking generated content, abuse detection), policy (usage rules, disclosure laws), and plain literacy — people knowing that text and images can be synthetic. There\'s no single fix, which is why safety is an ongoing practice, not a checkbox.</p>
-          <p>A grounding note against hype in both directions: today\'s systems are neither about to become sentient overlords nor mere toys. They\'re powerful, flawed statistical tools — and treating them with clear-eyed realism is itself a safety skill.</p>` },
+          <p>Responses span technical measures (watermarking, abuse detection), policy (usage rules, disclosure laws), and plain literacy. There\'s no single fix, which is why safety is an ongoing practice, not a checkbox.</p>
+          <p>A grounding note against hype in both directions: today\'s systems are neither about to become sentient overlords nor mere toys. They\'re powerful, flawed statistical tools — treating them with clear-eyed realism is itself a safety skill.</p>` },
         { t: 'quiz',
           q: 'Why can\'t the "dual-use" problem be solved just by training the model better?',
           opts: [

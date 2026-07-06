@@ -936,3 +936,196 @@ WIDGETS.rlagent = (el) => {
   el.append(canvas, row, out);
   render();
 };
+
+// ---------- generic, config-driven widgets ----------
+// These read their content from the lesson step object (step.cards / step.pairs / etc.)
+// so any lesson can drop in an interactive element without a bespoke build.
+
+function shuffled(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+// ---------- 14. Flashcards: click a card to flip it and reveal the answer ----------
+// step.cards = [[front, back], ...]
+WIDGETS.flashcards = (el, step) => {
+  const cards = step.cards || [];
+  const grid = document.createElement('div');
+  grid.className = 'flip-grid';
+  const out = document.createElement('div');
+  out.className = 'w-note';
+  let flippedCount = 0;
+  cards.forEach(([front, back]) => {
+    const card = document.createElement('div');
+    card.className = 'flip-card';
+    card.textContent = front;
+    let flipped = false;
+    card.onclick = () => {
+      flipped = !flipped;
+      card.classList.toggle('flipped', flipped);
+      card.textContent = flipped ? back : front;
+      if (flipped) { flippedCount++; if (flippedCount === cards.length) out.textContent = 'All flipped — nice.'; }
+    };
+    grid.append(card);
+  });
+  out.textContent = `Click a card to flip it. (${cards.length} cards)`;
+  el.append(grid, out);
+};
+
+// ---------- 15. Match: pair up terms with their definitions ----------
+// step.pairs = [[left, right], ...]
+WIDGETS.match = (el, step) => {
+  const pairs = step.pairs || [];
+  const cols = document.createElement('div');
+  cols.className = 'match-cols';
+  const leftCol = document.createElement('div'); leftCol.className = 'match-col';
+  const rightCol = document.createElement('div'); rightCol.className = 'match-col';
+  const out = document.createElement('div');
+  out.className = 'w-note';
+  let solved = 0;
+  let selLeft = null, selRight = null;
+  const leftChips = pairs.map((p, i) => ({ i, text: p[0] }));
+  const rightChips = shuffled(pairs.map((p, i) => ({ i, text: p[1] })));
+
+  function makeChip(item, col, isLeft) {
+    const b = document.createElement('button');
+    b.className = 'pick-chip';
+    b.textContent = item.text;
+    b.onclick = () => {
+      if (isLeft) { selLeft = item; } else { selRight = item; }
+      col.querySelectorAll('.pick-chip').forEach(c => c.classList.remove('sel'));
+      b.classList.add('sel');
+      if (selLeft && selRight) {
+        if (selLeft.i === selRight.i) {
+          leftCol.querySelector(`[data-i="${selLeft.i}"]`)?.classList.add('matched');
+          rightCol.querySelector(`[data-i="${selRight.i}"]`)?.classList.add('matched');
+          leftCol.querySelector(`[data-i="${selLeft.i}"]`).disabled = true;
+          rightCol.querySelector(`[data-i="${selRight.i}"]`).disabled = true;
+          solved++;
+          out.textContent = solved === pairs.length ? `All ${pairs.length} matched!` : `${solved}/${pairs.length} matched`;
+        } else {
+          [leftCol.querySelector('.sel'), rightCol.querySelector('.sel')].forEach(c => c && c.classList.add('wrong-flash'));
+          setTimeout(() => {
+            leftCol.querySelectorAll('.pick-chip').forEach(c => c.classList.remove('sel', 'wrong-flash'));
+            rightCol.querySelectorAll('.pick-chip').forEach(c => c.classList.remove('sel', 'wrong-flash'));
+          }, 500);
+        }
+        selLeft = null; selRight = null;
+      }
+    };
+    b.dataset.i = item.i;
+    col.append(b);
+  }
+  leftChips.forEach(item => makeChip(item, leftCol, true));
+  rightChips.forEach(item => makeChip(item, rightCol, false));
+  cols.append(leftCol, rightCol);
+  out.textContent = `Click one from each column to pair them. (${pairs.length} pairs)`;
+  el.append(cols, out);
+};
+
+// ---------- 16. Classify: sort items into the right bucket ----------
+// step.buckets = ['Bucket A', 'Bucket B', ...]; step.items = [[label, bucketIndex], ...]
+WIDGETS.classify = (el, step) => {
+  const buckets = step.buckets || [];
+  const items = shuffled(step.items || []);
+  let selected = null, correct = 0;
+  const pool = document.createElement('div');
+  pool.className = 'chip-row';
+  const bucketRow = document.createElement('div');
+  bucketRow.className = 'bucket-row';
+  const out = document.createElement('div');
+  out.className = 'w-note';
+
+  const bucketEls = buckets.map((name) => {
+    const b = document.createElement('div');
+    b.className = 'bucket target';
+    const h = document.createElement('h4'); h.textContent = name; b.append(h);
+    b.onclick = () => {
+      if (selected == null) return;
+      const chip = itemEls[selected];
+      if (!chip.disabled) {
+        if (items[selected][1] === buckets.indexOf(name)) {
+          chip.classList.remove('sel'); chip.classList.add('placed');
+          chip.disabled = true;
+          b.append(chip);
+          correct++;
+          selected = null;
+          out.textContent = correct === items.length ? `All ${items.length} sorted correctly!` : `${correct}/${items.length} correct so far`;
+        } else {
+          chip.classList.add('wrong-flash');
+          setTimeout(() => chip.classList.remove('wrong-flash'), 500);
+        }
+      }
+    };
+    return b;
+  });
+
+  const itemEls = items.map((item, i) => {
+    const chip = document.createElement('button');
+    chip.className = 'pick-chip';
+    chip.textContent = item[0];
+    chip.onclick = () => {
+      itemEls.forEach(c => c.classList.remove('sel'));
+      selected = i;
+      chip.classList.add('sel');
+    };
+    pool.append(chip);
+    return chip;
+  });
+
+  bucketRow.append(...bucketEls);
+  out.textContent = `Pick an item, then click the bucket it belongs in. (${items.length} items)`;
+  el.append(pool, bucketRow, out);
+};
+
+// ---------- 17. Order: click items into the correct sequence ----------
+// step.items = [...] already in the CORRECT order (widget shuffles for display)
+WIDGETS.order = (el, step) => {
+  const correctOrder = step.items || [];
+  const shownItems = shuffled(correctOrder.map((text, i) => ({ text, i })));
+  const placed = [];
+  const pool = document.createElement('div');
+  pool.className = 'chip-row';
+  const slots = document.createElement('div');
+  slots.className = 'order-slots';
+  const out = document.createElement('div');
+  out.className = 'w-note';
+
+  const slotEls = correctOrder.map((_, i) => {
+    const s = document.createElement('div');
+    s.className = 'order-slot';
+    s.textContent = `${i + 1}.`;
+    slots.append(s);
+    return s;
+  });
+
+  const chipEls = shownItems.map((item) => {
+    const chip = document.createElement('button');
+    chip.className = 'pick-chip';
+    chip.textContent = item.text;
+    chip.onclick = () => {
+      chip.disabled = true;
+      chip.classList.add('placed');
+      const slot = slotEls[placed.length];
+      slot.textContent = item.text;
+      slot.classList.add('filled');
+      placed.push(item.i);
+      if (placed.length === correctOrder.length) {
+        let allCorrect = true;
+        placed.forEach((origIdx, pos) => {
+          const ok = origIdx === pos;
+          slotEls[pos].classList.add(ok ? 'correct' : 'incorrect');
+          if (!ok) allCorrect = false;
+        });
+        out.innerHTML = allCorrect
+          ? 'Correct order!'
+          : 'Not quite the right order — green rows are right, red rows aren\'t. Correct sequence:<br>' + correctOrder.map((t, i) => `${i + 1}. ${t}`).join('<br>');
+      }
+    };
+    pool.append(chip);
+    return chip;
+  });
+
+  el.append(pool, slots, out);
+};

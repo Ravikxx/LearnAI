@@ -15,9 +15,9 @@ COURSES.push({
       minutes: 8,
       steps: [
         { t: 'text', title: 'Telling apart vs dreaming up', md: `
-          <p>Most of the models you\'ve met are <strong>discriminative</strong>: given an input, output a label. Cat or dog? Spam or not? They draw boundaries between things.</p>
-          <p><strong>Generative</strong> models do something harder: they learn what the data <em>looks like</em> well enough to produce brand-new examples. Not "is this a cat?" but "here is a cat that has never existed."</p>
-          <p>To do that, a model must capture the underlying <em>distribution</em> of the data — the statistical shape of all plausible cat-photos — and then sample new points from it. An LLM does exactly this for text: sample a plausible next token. Image generators do it for pixels.</p>` },
+          <p>Most models you\'ve met are <strong>discriminative</strong>: given an input, output a label. Cat or dog? Spam or not? They draw boundaries between things.</p>
+          <p><strong>Generative</strong> models do something harder: learn what the data <em>looks like</em> well enough to produce brand-new examples. Not "is this a cat?" but "here is a cat that has never existed."</p>
+          <div class="callout">💡 To do that, a model must capture the underlying <em>distribution</em> of the data — the statistical shape of all plausible cat-photos — then sample new points from it. An LLM does this for text (sample a plausible next token); image generators do it for pixels.</div>` },
         { t: 'quiz',
           q: 'Which task is generative rather than discriminative?',
           opts: [
@@ -27,9 +27,17 @@ COURSES.push({
           ],
           a: 1,
           why: 'Creating a novel face means sampling a new example from the learned distribution of "what faces look like" — generation. Spam-detection and temperature-prediction map an input to an answer — discrimination. Generative models synthesize; discriminative models sort.' },
+        { t: 'widget', name: 'classify', title: 'Generative or discriminative?', buckets: ['Discriminative', 'Generative'], items: [
+          ['Spam or not spam classifier', 0],
+          ['GAN generating a new face', 1],
+          ['Predicting tomorrow\'s temperature', 0],
+          ['Diffusion model painting an image from noise', 1],
+          ['Cat vs. dog image classifier', 0],
+          ['LLM sampling the next token of a story', 1],
+        ] },
         { t: 'text', title: 'The core challenge', md: `
-          <p>A 512×512 color image is over 750,000 numbers. The overwhelming majority of number-combinations are meaningless static. Real images occupy a vanishingly thin sliver of that space — the "manifold" of plausible pictures.</p>
-          <p>A generative model\'s job is to learn where that thin sliver is, so it can produce points <em>on</em> it (real-looking images) rather than off it (noise). Two big families crack this: <strong>GANs</strong> and <strong>diffusion models</strong>. We\'ll take them in turn — diffusion is what powers today\'s leading tools.</p>` },
+          <p>A 512×512 color image is over 750,000 numbers. The overwhelming majority of combinations are meaningless static — real images occupy a vanishingly thin sliver of that space, the "manifold" of plausible pictures.</p>
+          <p>A generative model\'s job is to learn where that sliver is, so it can land points <em>on</em> it rather than off it. Two big families crack this: <strong>GANs</strong> and <strong>diffusion models</strong> — diffusion is what powers today\'s leading tools.</p>` },
         { t: 'quiz',
           q: 'Why is generating a realistic image fundamentally hard?',
           opts: [
@@ -49,10 +57,10 @@ COURSES.push({
         { t: 'text', title: 'An arms race between two networks', md: `
           <p>The <strong>Generative Adversarial Network (GAN)</strong>, from 2014, framed generation as a duel between two networks trained against each other:</p>
           <ul>
-            <li>The <strong>Generator</strong> — a forger. It takes random noise and tries to turn it into a convincing fake image.</li>
-            <li>The <strong>Discriminator</strong> — a detective. It\'s shown a mix of real images and the forger\'s fakes, and must call each one real or fake.</li>
+            <li>The <strong>Generator</strong> — a forger. Takes random noise, tries to turn it into a convincing fake image.</li>
+            <li>The <strong>Discriminator</strong> — a detective. Shown a mix of real images and fakes, must call each one real or fake.</li>
           </ul>
-          <p>They train in opposition. Every time the detective gets better at spotting fakes, the forger is pushed to make better fakes; every improvement in the forger forces the detective to sharpen. An arms race.</p>` },
+          <p>Every time the detective gets better at spotting fakes, the forger is pushed to improve; every improvement in the forger forces the detective to sharpen. An arms race.</p>` },
         { t: 'quiz',
           q: 'What is the generator\'s training signal in a GAN?',
           opts: [
@@ -68,7 +76,13 @@ COURSES.push({
             <li>If the detective gets too good too fast, the forger gets no useful signal and stalls.</li>
             <li><strong>Mode collapse</strong>: the forger discovers one image that reliably fools the detective and just keeps producing variations of it — winning the game while ignoring the diversity of real data.</li>
           </ul>
-          <p>Balancing the two networks is an art. This fragility is a big reason the field largely shifted to diffusion, which trades the duel for a steadier, more controllable process — the next lesson.</p>` },
+          <p>Balancing the two networks is an art — a big reason the field largely shifted to diffusion, which trades the duel for a steadier process (next lesson).</p>` },
+        { t: 'widget', name: 'match', title: 'Match the GAN term to its role', pairs: [
+          ['Generator', 'Takes random noise, tries to create a convincing fake'],
+          ['Discriminator', 'Judges whether an image is real or fake'],
+          ['Mode collapse', 'Generator repeats one output, ignoring diversity'],
+          ['Adversarial training', 'Two networks improve by competing against each other'],
+        ] },
         { t: 'quiz',
           q: 'A GAN\'s generator starts outputting nearly the same face over and over, regardless of the input noise. This is...',
           opts: [
@@ -86,9 +100,9 @@ COURSES.push({
       minutes: 10,
       steps: [
         { t: 'text', title: 'The central idea: learn to un-blur', md: `
-          <p>Diffusion models come from a wonderfully counterintuitive idea. Take a training image and <strong>gradually add random noise</strong>, step by step, until it\'s pure static. That destruction process is easy and needs no learning.</p>
-          <p>Now train a neural network to run it <em>backwards</em>: given a noisy image, predict the noise that was added, so you can subtract a bit of it and get a slightly cleaner image. Do that over and over and you can walk from static back to a clean picture.</p>
-          <p>Here\'s the payoff: once the network can denoise, you can hand it <strong>pure random noise it has never seen</strong> and have it "denoise" toward a brand-new image. It\'s not recovering an original — it\'s hallucinating a plausible one, one small step at a time.</p>` },
+          <p>Diffusion models come from a counterintuitive idea. Take a training image and <strong>gradually add random noise</strong>, step by step, until it\'s pure static — an easy process that needs no learning.</p>
+          <p>Now train a network to run it <em>backwards</em>: given a noisy image, predict the noise that was added, subtract a bit of it, get a slightly cleaner image. Repeat, and you walk from static back to a clean picture.</p>
+          <div class="callout">💡 The payoff: hand the trained network <strong>pure random noise it has never seen</strong> and have it "denoise" toward a brand-new image. It\'s not recovering an original — it\'s hallucinating a plausible one, one small step at a time.</div>` },
         { t: 'quiz',
           q: 'What does a diffusion model\'s neural network actually learn to do?',
           opts: [
@@ -134,8 +148,8 @@ COURSES.push({
       minutes: 10,
       steps: [
         { t: 'text', title: 'Steering the noise with a prompt', md: `
-          <p>Plain diffusion makes <em>some</em> plausible image. To make the image <em>you asked for</em>, the denoiser needs to see your text. So the prompt is encoded into an embedding (by a text encoder like CLIP) and fed into the network at <strong>every denoising step</strong>.</p>
-          <p>Now each step isn\'t just "make this less noisy" — it\'s "make this less noisy <em>in the direction of the words 'a red fox in snow.'</em>" The text nudges every step, so the image gradually assembles itself to match the description. This is <strong>conditioning</strong>.</p>` },
+          <p>Plain diffusion makes <em>some</em> plausible image. To make the image <em>you asked for</em>, the denoiser needs to see your text: the prompt is encoded into an embedding (by a text encoder like CLIP) and fed into the network at <strong>every denoising step</strong>.</p>
+          <p>Each step becomes "make this less noisy <em>in the direction of the words 'a red fox in snow.'</em>" The text nudges every step, so the image assembles itself to match the description. This is <strong>conditioning</strong>.</p>` },
         { t: 'quiz',
           q: 'How does the text prompt influence a text-to-image diffusion model?',
           opts: [
@@ -146,8 +160,14 @@ COURSES.push({
           a: 1,
           why: 'The prompt conditions the whole reverse process. Encoded as an embedding and injected at each step, it biases every denoising nudge toward the described image. The picture is generated fresh from noise — never retrieved from a library.' },
         { t: 'text', title: 'Two tricks that make it practical', md: `
-          <p><strong>Latent diffusion.</strong> Denoising at full 512×512 resolution is expensive. Modern systems (like Stable Diffusion) first compress the image into a much smaller <em>latent</em> space, run all the noisy diffusion there, then decode the result back up to full pixels. Same idea, a fraction of the compute — this is what made high-quality image generation runnable on a normal GPU.</p>
-          <p><strong>Guidance scale.</strong> A dial for "how hard should the prompt push?" Low guidance = more creative and loosely related to your words; high guidance = sticks tightly to the prompt but can look oversaturated or stiff. It\'s the image world\'s cousin of the temperature knob you met with LLMs.</p>` },
+          <p><strong>Latent diffusion.</strong> Denoising at full 512×512 resolution is expensive. Modern systems (like Stable Diffusion) compress the image into a smaller <em>latent</em> space, diffuse there, then decode back to full pixels — same idea, a fraction of the compute.</p>
+          <p><strong>Guidance scale.</strong> A dial for "how hard should the prompt push?" Low = more creative, loosely related to your words; high = sticks tightly to the prompt but can look oversaturated or stiff. The image world\'s cousin of the temperature knob you met with LLMs.</p>` },
+        { t: 'widget', name: 'flashcards', title: 'Flip for the definition', cards: [
+          ['Conditioning', 'Feeding the text embedding into the denoiser at every step to steer the output'],
+          ['Latent diffusion', 'Running the diffusion process in a compressed representation, then decoding to full resolution'],
+          ['Guidance scale', 'A dial controlling how strongly the output follows the prompt vs. looks natural'],
+          ['CLIP (text encoder)', 'Converts your prompt into an embedding the model can condition on'],
+        ] },
         { t: 'quiz',
           q: 'Why do systems like Stable Diffusion run the diffusion process in a compressed "latent" space instead of on raw pixels?',
           opts: [
@@ -174,7 +194,7 @@ COURSES.push({
             <li><strong>Diffusion</strong> — learn to un-noise; turn static into images, one steady step at a time</li>
             <li><strong>Text-to-image</strong> — condition every step on the prompt; compress to a latent for speed</li>
           </ul>
-          <p>Next up: <strong>Reinforcement Learning</strong> — from models that create to agents that learn by trial, error, and reward.</p>` },
+          <p>Next: <strong>Reinforcement Learning</strong> — from models that create to agents that learn by trial, error, and reward.</p>` },
       ],
     },
   ],

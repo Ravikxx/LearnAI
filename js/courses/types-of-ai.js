@@ -15,16 +15,24 @@ COURSES.push({
       minutes: 9,
       steps: [
         { t: 'text', title: 'One machine wearing many hats', md: `
-          <p>Text generators, face detectors, image painters, chess engines — they look like wildly different inventions. Under the hood they\'re startlingly similar. Almost every one is the same basic machine: a <strong>neural network</strong>, which is just a big math function that takes in a list of numbers and puts out a list of numbers.</p>
-          <p>That\'s it. Numbers in, numbers out. A neural network never actually handles a word, a pixel, or a chess move — it handles numbers that <em>stand for</em> those things.</p>
+          <p>Text generators, face detectors, image painters, chess engines — wildly different inventions on the surface. Under the hood, almost every one is the same basic machine: a <strong>neural network</strong>, a big math function that takes in a list of numbers and puts out a list of numbers.</p>
+          <p>That\'s it. A neural network never actually handles a word, a pixel, or a chess move — it handles numbers that <em>stand for</em> those things.</p>
           <div class="callout">💡 So what makes an "image model" different from a "text model"? Not the math inside — mostly the same. What differs is (1) what the numbers <em>represent</em>, and (2) what data it was trained on. That\'s the whole idea behind "types" of AI.</div>` },
         { t: 'text', title: 'Meaning lives at the edges', md: `
           <p>If the network only sees numbers, where does <em>meaning</em> come from? From two translators bolted onto the ends:</p>
           <ul>
-            <li>An <strong>encoder</strong> turns real-world stuff into numbers going in. Text becomes token IDs; an image becomes pixel brightness values; sound becomes a list of air-pressure samples.</li>
-            <li>A <strong>decoder</strong> turns the output numbers back into real-world stuff. A number becomes a chosen word; a grid of numbers becomes a displayed image; an output becomes "move the paddle up."</li>
+            <li>An <strong>encoder</strong> turns real-world stuff into numbers going in — text into token IDs, an image into pixel brightness values, sound into air-pressure samples.</li>
+            <li>A <strong>decoder</strong> turns output numbers back into real-world stuff — a number into a chosen word, a grid of numbers into a displayed image, an output into "move the paddle up."</li>
           </ul>
-          <p>The network in the middle is blissfully ignorant of all of it. It doesn\'t know "cat" is an animal or that 7 is bigger than 3 — it just learned which output-numbers to produce for which input-numbers. <strong>We</strong> assign the meaning, on the outside.</p>` },
+          <p>The network in the middle never learns that "cat" is an animal — it just learns which output-numbers to produce for which input-numbers. <strong>We</strong> assign the meaning, on the outside.</p>` },
+        { t: 'widget', name: 'classify', title: 'Try it: encoder job or decoder job?', buckets: ['Encoder (real world → numbers)', 'Decoder (numbers → real world)'], items: [
+          ['Turning text into token IDs', 0],
+          ['Turning a number into a chosen word', 1],
+          ['Turning an image into pixel brightness values', 0],
+          ['Turning a grid of output numbers into a displayed image', 1],
+          ['Turning sound into air-pressure samples', 0],
+          ["Turning an output number into 'move the paddle up'", 1],
+        ], md: `<p>Every model has these two translators bolted onto its ends. Sort each job by which side it belongs on.</p>` },
         { t: 'quiz',
           q: 'In one sentence: what actually distinguishes an "image model" from a "text model"?',
           opts: [
@@ -52,8 +60,7 @@ COURSES.push({
       steps: [
         { t: 'text', title: 'Words in, words out', md: `
           <p>The type you know best. A <strong>text model</strong> (a Large Language Model, or LLM) takes text and produces text: chat, code, summaries, translation, answers.</p>
-          <p>Following the edges idea: your text is encoded into <strong>tokens</strong> (word-pieces, each with an ID number), the network processes those numbers, and it outputs a probability for every possible next token. The decoder picks one, appends it, and the loop runs again — that\'s the text streaming onto your screen.</p>
-          <p>On a model menu these are labeled "text" or "chat." Everything they do is that one trick: predict the next token, over and over.</p>` },
+          <p>Your text is encoded into <strong>tokens</strong> (word-pieces with ID numbers), the network processes those numbers, and it outputs a probability for every possible next token. The decoder picks one, appends it, and the loop runs again — that\'s the text streaming onto your screen.</p>` },
         { t: 'widget', name: 'tokenizer', title: 'Try it: how text becomes numbers', md: `
           <p>This is the encoder from lesson 1, made concrete. Type anything and watch it get chopped into tokens — the numbers a text model actually reads. Common words stay whole; rare ones shatter into pieces.</p>` },
         { t: 'quiz',
@@ -67,7 +74,16 @@ COURSES.push({
           why: 'One token at a time is the entire mechanism. No templates, no lookup — each token is a fresh prediction conditioned on everything so far. (The "How LLMs Work" course takes this apart in detail if you want the deep version.)' },
         { t: 'text', title: 'Where text models shine and struggle', md: `
           <p>Because they model language statistically, text models are brilliant at anything language-shaped — drafting, explaining, coding, rephrasing — and shaky where fluent-sounding isn\'t the same as correct: exact arithmetic, obscure facts, counting letters in a word.</p>
-          <p>Keep the modality lens: a text model\'s world is <em>tokens</em>. It has never seen a pixel or heard a sound. To handle those, you need a different type — or a multimodal model that bolts on extra encoders, which we\'ll reach at the end.</p>` },
+          <p>A text model\'s world is <em>tokens</em> — it has never seen a pixel or heard a sound. For those, you need a different type, or a multimodal model that bolts on extra encoders (we\'ll reach that at the end).</p>` },
+        { t: 'quiz',
+          q: 'Text models are excellent at rephrasing a paragraph but shakier at exact arithmetic. Why?',
+          opts: [
+            'Arithmetic uses a different programming language internally',
+            'The model is optimized to predict plausible-sounding tokens, not to compute — fluent phrasing and exact correctness are not the same target',
+            'Text models have never been shown any numbers',
+          ],
+          a: 1,
+          why: 'Predicting the next token well correlates strongly with fluent, sensible language, but only loosely with getting an exact computation right. That gap between "sounds right" and "is right" is why calculators and code execution often beat raw next-token prediction on precise math.' },
       ],
     },
     {
@@ -76,8 +92,8 @@ COURSES.push({
       minutes: 10,
       steps: [
         { t: 'text', title: 'The type that outputs a vector, not words', md: `
-          <p>Here\'s the one that puzzled you on OpenRouter. An <strong>embedding model</strong> takes text (or an image, or audio) and outputs a single fixed list of numbers — a <strong>vector</strong>, maybe 768 or 1,536 numbers long. It does <em>not</em> output words. That vector is a numeric fingerprint of the input\'s <em>meaning</em>.</p>
-          <p>The rule that makes it useful: <strong>similar meanings get similar vectors.</strong> "How do I cancel my subscription?" and "I want to end my plan" land at nearly the same coordinates, even though they share almost no words. "Photosynthesis" lands far away.</p>
+          <p>Here\'s the one that puzzled you on OpenRouter. An <strong>embedding model</strong> takes text (or an image, or audio) and outputs a single fixed list of numbers — a <strong>vector</strong>, maybe 768 or 1,536 numbers long. It does <em>not</em> output words; the vector is a numeric fingerprint of the input\'s <em>meaning</em>.</p>
+          <p>The rule that makes it useful: <strong>similar meanings get similar vectors.</strong> "How do I cancel my subscription?" and "I want to end my plan" land at nearly the same coordinates, despite sharing almost no words. "Photosynthesis" lands far away.</p>
           <div class="callout">💡 A chat model answers your text. An embedding model measures your text — turning it into coordinates you can compare, sort, and search. Different job, different output type.</div>` },
         { t: 'widget', name: 'embeddings', title: 'Try it: meaning as coordinates', md: `
           <p>An embedding model turns each input into a point like these. Click a word to see its nearest neighbors — the ones an embedding model would judge closest in meaning. Similar things sit close together; that proximity is the entire product.</p>` },
@@ -94,12 +110,12 @@ COURSES.push({
           <p>Turning meaning into comparable coordinates quietly powers a huge amount of software:</p>
           <ul>
             <li><strong>Semantic search</strong> — embed your query and every document; return the nearest ones. Search by meaning, not keywords.</li>
-            <li><strong>RAG</strong> — the retrieval step that finds relevant docs to feed a chatbot runs on embeddings.</li>
+            <li><strong>RAG</strong> — the retrieval step that feeds a chatbot relevant docs runs on embeddings.</li>
             <li><strong>Recommendations</strong> — "similar to what you liked" = nearby vectors.</li>
-            <li><strong>Clustering &amp; deduplication</strong> — group items by proximity; spot near-duplicates.</li>
-            <li><strong>Classification</strong> — a cheap classifier on top of embeddings sorts support tickets, flags spam, tags topics.</li>
+            <li><strong>Clustering &amp; deduplication</strong> — group by proximity; spot near-duplicates.</li>
+            <li><strong>Classification</strong> — a cheap classifier on top of embeddings sorts tickets, flags spam, tags topics.</li>
           </ul>
-          <p>They\'re listed separately from chat models because they\'re smaller, faster, and cheaper — you\'d call one millions of times to index a library, where a full chat model would be overkill and far too slow.</p>` },
+          <p>They\'re a separate product because they\'re smaller, faster, and cheaper — you\'d call one millions of times to index a library, where a full chat model would be overkill.</p>` },
         { t: 'quiz',
           q: 'Why offer an embedding model as its own product instead of just using a chat model?',
           opts: [
@@ -117,12 +133,12 @@ COURSES.push({
       minutes: 9,
       steps: [
         { t: 'text', title: 'Two very different image jobs', md: `
-          <p>"Image AI" actually splits into two opposite directions, and it helps to keep them straight:</p>
+          <p>"Image AI" splits into two opposite directions:</p>
           <ul>
-            <li><strong>Image understanding</strong> — pixels in, an <em>answer</em> out. Is there a tumor? What breed is this dog? Where are the pedestrians? Describe this photo. The picture (a grid of numbers) is the input; a label or caption is the output.</li>
+            <li><strong>Image understanding</strong> — pixels in, an <em>answer</em> out. Is there a tumor? What breed is this dog? Where are the pedestrians? The picture is the input; a label or caption is the output.</li>
             <li><strong>Image generation</strong> — text in, <em>pixels</em> out. "A red fox in snow, oil painting." Here the picture is what the model produces.</li>
           </ul>
-          <p>Same modality, mirror-image data flow. On a menu you\'ll see understanding models under "vision" and generators under "image generation."</p>` },
+          <p>Same modality, mirror-image data flow. Menus label understanding models "vision" and generators "image generation."</p>` },
         { t: 'quiz',
           q: 'A self-driving car\'s system that spots pedestrians in camera frames is which kind of image model?',
           opts: [
@@ -133,9 +149,11 @@ COURSES.push({
           a: 1,
           why: 'The input is the image and the output is an interpretation — understanding, not generation. Generation goes the other way: a description in, a brand-new image out. Same pixels-as-numbers idea, opposite direction.' },
         { t: 'text', title: 'How each side works, briefly', md: `
-          <p><strong>Understanding</strong> leans on <em>convolutional networks</em> (or vision Transformers): small filters slide across the pixel grid detecting edges, then textures, then shapes, then objects — a learned hierarchy. (The "Computer Vision with PyTorch" course builds one.)</p>
-          <p><strong>Generation</strong> today mostly uses <em>diffusion</em>: start from pure random noise and repeatedly denoise it, steered by your text prompt, until an image emerges. (The "Generative AI &amp; Diffusion" course goes deep.)</p>
-          <p>Either way, an image is simply a 3-D block of numbers — height × width × 3 color channels — and the model reads or writes those numbers.</p>` },
+          <p><strong>Understanding</strong> leans on <em>convolutional networks</em> (or vision Transformers): small filters slide across the pixel grid, detecting edges, then textures, then shapes, then objects. (The "Computer Vision with PyTorch" course builds one.)</p>
+          <p><strong>Generation</strong> today mostly uses <em>diffusion</em>: start from random noise and repeatedly denoise it, steered by your text prompt, until an image emerges. (The "Generative AI &amp; Diffusion" course goes deep.)</p>
+          <p>Either way, an image is a 3-D block of numbers — height × width × 3 color channels — and the model reads or writes those numbers.</p>` },
+        { t: 'widget', name: 'diffusion', title: 'Try it: watch the generation direction, live', md: `
+          <p>This is the "text in, pixels out" direction from above. Start from noise, press <strong>Generate</strong>, and watch an image emerge step by step — the mirror image of what an understanding model does. (Want the mechanics of <em>why</em> this works? The Generative AI course goes deep.)</p>` },
         { t: 'quiz',
           q: 'In what sense is a color photo already "numbers" before any AI touches it?',
           opts: [
@@ -153,9 +171,9 @@ COURSES.push({
       minutes: 9,
       steps: [
         { t: 'text', title: 'Sound is a number too', md: `
-          <p>A microphone measures air pressure thousands of times a second; each measurement is a number. So a sound clip is just a long list of numbers (a waveform) — same story as pixels and tokens. That means audio gets its own family of models:</p>
+          <p>A microphone measures air pressure thousands of times a second; each measurement is a number. A sound clip is just a long list of numbers (a waveform) — same story as pixels and tokens. That gives audio its own family of models:</p>
           <ul>
-            <li><strong>Speech-to-text (transcription)</strong> — audio in, text out. This is Whisper, your phone\'s dictation, auto-captions.</li>
+            <li><strong>Speech-to-text (transcription)</strong> — audio in, text out. Whisper, phone dictation, auto-captions.</li>
             <li><strong>Text-to-speech (TTS)</strong> — text in, audio out. Voice assistants, audiobook narration, screen readers.</li>
             <li><strong>Audio/music generation</strong> — a prompt in, new sound out. AI-generated songs, sound effects, voices.</li>
           </ul>` },
@@ -168,9 +186,27 @@ COURSES.push({
           ],
           a: 1,
           why: 'Captions turn spoken audio into written text, so it\'s speech-to-text (transcription). Text-to-speech is the reverse — reading text aloud. Notice the pattern across the course: every "type" is defined by which modality is the input and which is the output.' },
+        { t: 'widget', name: 'classify', title: 'Try it: which audio model is this?', buckets: ['Speech → text', 'Text → speech', 'Prompt → new sound'], items: [
+          ['Auto-captioning a video', 0],
+          ['Transcribing a podcast episode', 0],
+          ["A voice assistant reading its reply aloud", 1],
+          ['Audiobook narration', 1],
+          ['A screen reader for visually impaired users', 1],
+          ['Generating background music for a video from a text description', 2],
+          ['Creating a sound effect that was never recorded', 2],
+        ], md: `<p>Sort each example by which direction the audio is flowing.</p>` },
         { t: 'text', title: 'The same engine, again', md: `
-          <p>You might expect audio to need something exotic. It largely doesn\'t. Whisper, for instance, is a <em>Transformer</em> — the very architecture behind ChatGPT — just with an encoder that reads sound instead of tokens. The sound is chopped into little chunks, turned into numbers, and the model predicts text tokens from them.</p>
-          <p>This is the quiet theme of modern AI: one flexible architecture, re-pointed at a new modality by changing its front door (the encoder) and its training data.</p>` },
+          <p>Audio doesn\'t need anything exotic. Whisper, for instance, is a <em>Transformer</em> — the same architecture behind ChatGPT — with an encoder that reads sound instead of tokens: the audio is chopped into chunks, turned into numbers, and the model predicts text tokens from them.</p>
+          <p>The quiet theme of modern AI: one flexible architecture, re-pointed at a new modality by changing its front door (the encoder) and its training data.</p>` },
+        { t: 'quiz',
+          q: 'Whisper is described as "a Transformer with a different encoder." What does that illustrate?',
+          opts: [
+            'Audio needed an entirely new kind of AI invented from scratch',
+            'The same core architecture generalizes across modalities — swap the encoder and training data, and a text-shaped machine reads sound instead',
+            'Transformers only work on text and Whisper is a rare exception',
+          ],
+          a: 1,
+          why: 'This is the through-line of the whole course: one adaptable architecture, re-pointed at a new modality by changing what feeds it numbers and what data it learns from. Audio, like text, image, and video, rides the same underlying machine.' },
       ],
     },
     {
@@ -179,12 +215,12 @@ COURSES.push({
       minutes: 9,
       steps: [
         { t: 'text', title: 'Images, but with a clock', md: `
-          <p>Video is just images in sequence — 24 or 30 still frames per second, each frame a grid of numbers. So <strong>video models</strong> inherit the image split:</p>
+          <p>Video is just images in sequence — 24 or 30 frames per second, each frame a grid of numbers. So <strong>video models</strong> inherit the image split:</p>
           <ul>
             <li><strong>Video understanding</strong> — frames in, an answer out: what action is happening, is this content unsafe, summarize this clip, find the moment someone scores.</li>
             <li><strong>Video generation</strong> — text (or a start image) in, a moving clip out: tools like Sora and Runway.</li>
           </ul>
-          <p>The new ingredient is <strong>time</strong>. The model can\'t treat each frame independently — it has to understand motion and keep things consistent across frames.</p>` },
+          <p>The new ingredient is <strong>time</strong>: the model can\'t treat each frame independently — it must understand motion and stay consistent across frames.</p>` },
         { t: 'quiz',
           q: 'What extra challenge does video add compared to a single image?',
           opts: [
@@ -194,8 +230,17 @@ COURSES.push({
           ],
           a: 1,
           why: 'A one-second clip is dozens of images that must agree with each other — a generated character can\'t change shirt color between frames, and a face must move naturally. That temporal consistency, plus the sheer volume of pixels-over-time, is why video is the most compute-hungry modality here.' },
+        { t: 'widget', name: 'classify', title: 'Try it: understanding or generation?', buckets: ['Video understanding (frames → answer)', 'Video generation (text/image → clip)'], items: [
+          ['Detecting the moment a goal is scored in a match', 0],
+          ['Flagging unsafe content in a clip', 0],
+          ['Summarizing a long video into a paragraph', 0],
+          ['Classifying the action happening in a clip', 0],
+          ['Generating a moving clip from a text prompt', 1],
+          ['Animating a still photo into a short video', 1],
+          ['Creating a new scene no camera ever filmed', 1],
+        ], md: `<p>Same split as image models, one dimension harder. Sort each example.</p>` },
         { t: 'text', title: 'Why video generation feels newer', md: `
-          <p>Convincing text-to-video arrived years after text-to-image for concrete reasons: many times more numbers to produce (every frame is a full image), a hard demand for temporal coherence (no flickering, no objects morphing), and much scarcer high-quality training data. It\'s the same diffusion-style ideas as images, scaled up and taught to respect time — which is a genuinely harder problem, not just a bigger one.</p>` },
+          <p>Convincing text-to-video arrived years after text-to-image for concrete reasons: far more numbers to produce (every frame is a full image), a hard demand for temporal coherence (no flickering, no objects morphing), and much scarcer high-quality training data. It\'s the same diffusion-style ideas as images, scaled up and taught to respect time — genuinely harder, not just bigger.</p>` },
         { t: 'quiz',
           q: 'Roughly why did believable AI video lag behind AI images?',
           opts: [
@@ -213,16 +258,16 @@ COURSES.push({
       minutes: 12,
       steps: [
         { t: 'text', title: 'A model that knows no words', md: `
-          <p>Now the type you were most curious about — and it\'s the most different. A game-playing agent (think the AI that mastered chess, Go, or Atari) has never read a book. It doesn\'t know English, or any language. Yet it beats world champions. How?</p>
+          <p>Now the type you were most curious about — and the most different. A game-playing agent (chess, Go, Atari) has never read a book. It doesn\'t know English, or any language. Yet it beats world champions. How?</p>
           <p>It learns by <strong>reinforcement learning (RL)</strong>: not from labeled answers, but from <em>trial, error, and reward</em>. It plays, gets a score signal (won/lost, points up/down), and gradually adjusts to earn more reward. Nobody tells it the right move — it discovers moves that tend to win.</p>` },
         { t: 'text', title: 'What actually goes in and out', md: `
           <p>Keep the edges idea from lesson 1. For a game agent:</p>
           <ul>
-            <li><strong>Input (the observation)</strong> — the game state as numbers: the board encoded as a grid, or the raw screen pixels. Numbers, as always.</li>
-            <li><strong>The network</strong> — maps that observation to an output. This mapping is called the <strong>policy</strong>.</li>
-            <li><strong>Output (the action)</strong> — a few numbers, one per possible move. Say four outputs for up/down/left/right. The environment simply picks the move whose output number is largest.</li>
+            <li><strong>Input (observation)</strong> — the game state as numbers: a board grid, or raw screen pixels.</li>
+            <li><strong>The network</strong> — maps that observation to an output. This mapping is the <strong>policy</strong>.</li>
+            <li><strong>Output (action)</strong> — one number per possible move (say four, for up/down/left/right). The environment picks the move whose output is largest.</li>
           </ul>
-          <p>So the agent "chooses a move" by outputting numbers and letting the game read off the biggest one. It\'s the same numbers-in-numbers-out machine — pointed at a game.</p>` },
+          <p>The agent "chooses a move" by outputting numbers and letting the game read off the biggest one — the same numbers-in-numbers-out machine, pointed at a game.</p>` },
         { t: 'quiz',
           q: 'Your core question: how can this agent "output a move" if it doesn\'t know what a number or a move even is?',
           opts: [
@@ -233,8 +278,8 @@ COURSES.push({
           a: 1,
           why: 'This is lesson 1 paying off. The network doesn\'t know it\'s playing a game or that its outputs are "moves" — it emits raw numbers, and the environment is wired so that output-slot 2 means "move left." Meaning is entirely external. "Not knowing what a number is" was never a problem, because knowing was never required.' },
         { t: 'text', title: 'Learning with no teacher: self-play', md: `
-          <p>Where do good moves come from with no answer key? For games like Go, the trick is <strong>self-play</strong>: the agent plays millions of games <em>against itself</em>. Wins nudge the moves that led to them upward; losses nudge them down. Over millions of games it bootstraps from random flailing to superhuman skill — and because it isn\'t copying human games, it invents strategies no human taught it (AlphaGo\'s famous "move 37" stunned professionals).</p>
-          <p>The reward is the entire teacher. Design the reward well and the agent finds clever ways to earn it; design it carelessly and it finds clever ways to <em>cheat</em> it — the reward-hacking problem from the AI Safety course.</p>` },
+          <p>Where do good moves come from with no answer key? For games like Go, the trick is <strong>self-play</strong>: the agent plays millions of games <em>against itself</em>. Wins nudge the moves that led to them upward; losses nudge them down. It bootstraps from random flailing to superhuman skill — and because it isn\'t copying human games, it invents strategies no human taught it (AlphaGo\'s famous "move 37" stunned professionals).</p>
+          <p>The reward is the entire teacher. Design it well and the agent finds clever ways to earn it; design it carelessly and it finds clever ways to <em>cheat</em> it — the reward-hacking problem from the AI Safety course.</p>` },
         { t: 'widget', name: 'rlagent', title: 'Try it: watch an agent learn from reward', md: `
           <p>This agent knows nothing — no map, no language, no idea what "left" means. Press <strong>Train</strong> and watch it learn purely from reward (★ = +1, ✕ = −1): the grid turns green where it discovers value, and arrows show the policy it forms. Then hit <strong>Run agent</strong> to watch it walk the path it taught itself.</p>` },
         { t: 'quiz',
@@ -263,8 +308,8 @@ COURSES.push({
       minutes: 10,
       steps: [
         { t: 'text', title: 'One model, many senses', md: `
-          <p>The newest flagship models refuse to stay in one lane. A <strong>multimodal model</strong> (GPT-4o, Gemini, Claude) can take text, images, and audio together and respond across modalities — look at a photo and discuss it, hear a question and speak an answer, read a chart and explain it.</p>
-          <p>The trick is beautifully consistent with everything you\'ve learned: give the model several encoders — one for text, one for images, one for audio — that all translate their modality into the <em>same</em> internal number-space. Once everything is numbers in a shared space, one Transformer processes them together, indifferent to where each came from.</p>` },
+          <p>The newest flagship models refuse to stay in one lane. A <strong>multimodal model</strong> (GPT-4o, Gemini, Claude) takes text, images, and audio together and responds across modalities — look at a photo and discuss it, hear a question and speak an answer, read a chart and explain it.</p>
+          <p>The trick: give the model several encoders — one per modality — that all translate into the <em>same</em> internal number-space. Once everything is numbers in a shared space, one Transformer processes them together, indifferent to where each came from.</p>` },
         { t: 'quiz',
           q: 'How does a single model handle both images and text at once?',
           opts: [
@@ -274,6 +319,13 @@ COURSES.push({
           ],
           a: 1,
           why: 'Unify at the number level: text-encoder and image-encoder both output vectors in one common space, so the core model reasons over them jointly. This is the payoff of "everything is numbers" — once modalities share a numeric language, mixing them is natural.' },
+        { t: 'widget', name: 'order', title: 'Try it: order how a multimodal prompt gets processed', items: [
+          "The text encoder converts the prompt's words into vectors",
+          "The image encoder converts the photo's pixels into vectors in that same space",
+          'The text and image vectors are combined into one sequence',
+          'The shared Transformer processes the combined sequence jointly',
+          'A decoder turns the output vectors back into words (or speech, or an image)',
+        ], md: `<p>Ask GPT-4o about a photo, and this is what actually happens under the hood. Click the steps into order.</p>` },
         { t: 'text', title: 'The whole zoo, and where it\'s heading', md: `
           <p>You now have the map. The "types" you\'ll see listed are mostly defined by <em>which modality goes in and which comes out</em>:</p>
           <ul>
@@ -285,7 +337,7 @@ COURSES.push({
             <li><strong>Game/RL agent</strong> — observation → action, taught by reward</li>
             <li><strong>Multimodal</strong> — several at once, in a shared space</li>
           </ul>
-          <p>A few more you may meet: <strong>robotics/action models</strong> (camera + goal → motor commands — RL and vision, embodied), <strong>time-series/forecasting</strong> models (past numbers → future numbers), and <strong>recommendation</strong> models (your behavior → what you\'ll like). Same recipe every time.</p>` },
+          <p>A few more you may meet: <strong>robotics/action models</strong> (camera + goal → motor commands), <strong>time-series/forecasting</strong> models (past numbers → future numbers), and <strong>recommendation</strong> models (your behavior → what you\'ll like). Same recipe every time.</p>` },
         { t: 'quiz',
           q: 'What\'s the single biggest takeaway tying all these "types" together?',
           opts: [

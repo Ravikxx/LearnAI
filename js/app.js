@@ -137,7 +137,7 @@
         const box = document.createElement('div');
         box.className = 'widget';
         card.append(box);
-        try { WIDGETS[step.name](box); }
+        try { WIDGETS[step.name](box, step); }
         catch (e) { box.textContent = 'Widget failed to load: ' + e.message; }
       } else if (step.t === 'quiz') {
         card.innerHTML = `<div class="quiz-q">${step.q}</div>`;

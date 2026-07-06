@@ -15,7 +15,7 @@ COURSES.push({
       minutes: 9,
       steps: [
         { t: 'text', title: 'A prompt is a starting context, not a command', md: `
-          <p>Remember what an LLM does: given the text so far, predict a plausible continuation. Your prompt <em>is</em> that "text so far." You're not issuing an order to an obedient robot — you're setting up a context and asking, "what text most plausibly comes next?"</p>
+          <p>Remember what an LLM does: given the text so far, predict a plausible continuation. Your prompt <em>is</em> that "text so far" — you're not commanding an obedient robot, you're setting up a context and asking "what most plausibly comes next?"</p>
           <p>That reframing explains almost every prompting tip. A vague prompt has many plausible continuations, so you get a generic, hedge-everything answer. A specific, richly-set-up prompt narrows the plausible continuations toward the one you actually want.</p>
           <div class="callout">💡 Bad: "Write about dogs." Better: "Write a 3-sentence, upbeat product blurb for a chew toy for large-breed puppies, aimed at first-time dog owners."</div>` },
         { t: 'quiz',
@@ -35,7 +35,15 @@ COURSES.push({
             <li><strong>Context</strong> — the specific material to work from: the article to summarize, the code that's failing, the data.</li>
             <li><strong>Format</strong> — "Answer as a bulleted list," "Return JSON with keys title and summary," "Show your steps."</li>
           </ul>
-          <p>You don't always need all four, but when an answer disappoints, the fix is usually a missing lever — most often <em>context</em> or <em>format</em>.</p>` },
+          <p>When an answer disappoints, the fix is usually a missing lever — most often <em>context</em> or <em>format</em>.</p>` },
+        { t: 'widget', name: 'match', title: 'Try it: match the lever to what it does', md: `
+          <p>Pair each lever with the job it does in a prompt.</p>`,
+          pairs: [
+            ['Role / persona', 'Sets the tone and expertise the answer is drawn from'],
+            ['Task', 'States precisely what to do, plus constraints like length or audience'],
+            ['Context', 'The specific material to work from — the article, the code, the data'],
+            ['Format', 'The shape of the output — bullets, JSON, numbered steps'],
+          ] },
         { t: 'quiz',
           q: 'You ask for "a summary" and get a wall of prose when you wanted 3 bullets. Which lever did you forget?',
           opts: [
@@ -46,8 +54,7 @@ COURSES.push({
           a: 1,
           why: 'The model can\'t read your mind about output shape, so it picks the most common plausible form — flowing prose. Stating the format ("exactly 3 bullets, max 12 words each") removes the guesswork. Format is the cheapest, highest-return lever.' },
         { t: 'text', title: 'Show, don\'t just tell', md: `
-          <p>The single most reliable upgrade to a prompt: <strong>give an example of what you want.</strong> Instead of describing the output in the abstract, demonstrate it once.</p>
-          <p>Turning "extract the sentiment" into "Here's an example — <code>Input: 'Loved it!' → Output: positive</code> — now do this one:" pins down format, labels, and edge-case handling all at once, far more precisely than a paragraph of instructions could.</p>
+          <p>The single most reliable upgrade to a prompt: <strong>give an example of what you want</strong>, instead of describing it in the abstract. Turning "extract the sentiment" into "Here's an example — <code>Input: 'Loved it!' → Output: positive</code> — now do this one:" pins down format, labels, and edge cases all at once, far more precisely than a paragraph of instructions.</p>
           <p>This is so effective it has a name — <strong>few-shot prompting</strong> — and it's the whole next lesson.</p>` },
         { t: 'quiz',
           q: 'Someone complains "the model keeps ignoring my instructions." What\'s usually the more effective fix?',
@@ -66,8 +73,7 @@ COURSES.push({
       minutes: 9,
       steps: [
         { t: 'text', title: 'Zero-shot vs few-shot', md: `
-          <p><strong>Zero-shot</strong> = you just describe the task. <strong>Few-shot</strong> = you include a handful of worked examples before the real question.</p>
-          <p>Why does showing 2–5 examples help so much? Because the model learns the pattern <em>in-context</em> — no retraining, no weight changes. The examples become part of the "text so far," and the model continues the pattern you've established. This is called <strong>in-context learning</strong>, and it was one of the surprising emergent abilities of large models.</p>` },
+          <p><strong>Zero-shot</strong> = you just describe the task. <strong>Few-shot</strong> = you include a handful of worked examples before the real question. Showing 2–5 examples helps because the model learns the pattern <em>in-context</em> — no retraining, no weight changes. The examples become part of the "text so far," and the model continues the pattern you've established. This is <strong>in-context learning</strong>, one of the surprising emergent abilities of large models.</p>` },
         { t: 'quiz',
           q: 'Few-shot examples change the model\'s answer without changing its parameters. How is that possible?',
           opts: [
@@ -77,9 +83,20 @@ COURSES.push({
           ],
           a: 1,
           why: 'Nothing about the model changes. The examples sit in the context window, and attention lets the model pattern-match against them when producing the next tokens. Close the chat and the "learning" is gone — it lived entirely in the context.' },
+        { t: 'widget', name: 'classify', title: 'Try it: good few-shot example or bad?', md: `
+          <p>Sort each into the bucket it belongs in.</p>`,
+          buckets: ['Good few-shot example', 'Bad few-shot example'],
+          items: [
+            ['Consistent input→output pairs in the exact format you want back', 0],
+            ['Covers a tricky edge case (sarcasm, negation) like the real inputs will have', 0],
+            ['A labeled output that\'s actually wrong or inconsistent with the rest', 1],
+            ['Examples so similar to each other they show only one pattern', 1],
+            ['A clear labeled example instead of a vague description of the task', 0],
+            ['Far more examples than needed, repeating the same pattern and burning tokens', 1],
+          ] },
         { t: 'text', title: 'Let it think out loud', md: `
-          <p>Ask a model "What\'s 17 × 24?" and demand only the final number, and it often flubs it. Ask it to <strong>work step by step</strong>, and accuracy jumps.</p>
-          <p>This is <strong>chain-of-thought (CoT) prompting</strong>. Why it works ties straight back to the architecture: the model does a fixed amount of computation per token. Forcing an immediate answer gives it one shot. Letting it generate intermediate steps gives it <em>more tokens to compute across</em> — each step conditions the next, like showing your work on paper.</p>
+          <p>Ask a model "What\'s 17 × 24?" and demand only the final number, and it often flubs it. Ask it to <strong>work step by step</strong>, and accuracy jumps — this is <strong>chain-of-thought (CoT) prompting</strong>.</p>
+          <p>Why it works ties to the architecture: the model does a fixed amount of computation per token. Forcing an immediate answer gives it one shot; generating intermediate steps gives it <em>more tokens to compute across</em> — each step conditions the next, like showing your work on paper.</p>
           <div class="callout">💡 The magic phrase "Let\'s think step by step" measurably raised benchmark scores in a famous 2022 paper — just by inviting the model to reason before answering.</div>` },
         { t: 'quiz',
           q: 'Why does "think step by step" help a model with a hard arithmetic or logic problem?',
@@ -107,8 +124,8 @@ COURSES.push({
       minutes: 10,
       steps: [
         { t: 'text', title: 'The frozen-knowledge problem', md: `
-          <p>An LLM\'s knowledge is frozen at its training cutoff and blurry on specifics — it can\'t know your company\'s internal docs, today\'s news, or the contents of a PDF you just made. And when it doesn\'t know, it doesn\'t stop; it produces plausible-sounding tokens anyway. Hallucination.</p>
-          <p>The dominant fix is beautifully simple: <strong>don\'t ask the model to recall — give it the answer to read.</strong> Fetch the relevant documents and paste them into the context alongside the question. This is <strong>Retrieval-Augmented Generation (RAG)</strong>.</p>` },
+          <p>An LLM\'s knowledge is frozen at its training cutoff and blurry on specifics — it can\'t know your company\'s internal docs, today\'s news, or a PDF you just made. When it doesn\'t know, it doesn\'t stop; it produces plausible-sounding tokens anyway. Hallucination.</p>
+          <p>The fix: <strong>don\'t ask the model to recall — give it the answer to read.</strong> Fetch the relevant documents and paste them into the context alongside the question. This is <strong>Retrieval-Augmented Generation (RAG)</strong>.</p>` },
         { t: 'quiz',
           q: 'How does putting a source document in the prompt reduce hallucination?',
           opts: [
@@ -119,7 +136,7 @@ COURSES.push({
           a: 1,
           why: 'Nothing is taught — weights don\'t change. But the true information is now IN the context, so the most plausible continuation is one that draws on it. You\'ve turned a memory test into an open-book test, and open-book is far more reliable.' },
         { t: 'text', title: 'How retrieval finds the right text', md: `
-          <p>You can\'t stuff a 10,000-page manual into the context window. So RAG retrieves only the <em>relevant</em> chunks. The trick is embeddings — the same "meaning as geometry" idea from the LLM course.</p>
+          <p>You can\'t stuff a 10,000-page manual into the context window, so RAG retrieves only the <em>relevant</em> chunks — using embeddings, the same "meaning as geometry" idea from the LLM course.</p>
           <ol>
             <li>Split your documents into chunks; compute an <strong>embedding</strong> (a meaning-vector) for each; store them in a <strong>vector database</strong>.</li>
             <li>When a question arrives, embed the question too.</li>
@@ -155,8 +172,8 @@ COURSES.push({
       minutes: 10,
       steps: [
         { t: 'text', title: 'Giving the model hands', md: `
-          <p>A plain LLM can only emit text. It can\'t check today\'s weather, run code, or book a meeting. <strong>Tool use</strong> (aka function calling) changes that: you tell the model what tools exist, and instead of answering directly, it can emit a structured request like <code>get_weather(city="Oslo")</code>.</p>
-          <p>Your program sees that request, actually runs the function, and feeds the result back into the context. The model then continues with real data in hand. The model never runs anything itself — it decides <em>what</em> to call; your code does the calling.</p>` },
+          <p>A plain LLM can only emit text — it can\'t check today\'s weather, run code, or book a meeting. <strong>Tool use</strong> (aka function calling) changes that: you tell the model what tools exist, and instead of answering directly, it can emit a structured request like <code>get_weather(city="Oslo")</code>.</p>
+          <p>Your program sees that request, runs the function, and feeds the result back into the context — the model then continues with real data in hand. It never runs anything itself; it decides <em>what</em> to call, your code does the calling.</p>` },
         { t: 'quiz',
           q: 'When an LLM "uses a tool," what does the model itself actually produce?',
           opts: [
@@ -174,7 +191,7 @@ COURSES.push({
             <li><strong>Observe</strong> — the tool\'s result is added to the context.</li>
             <li><strong>Repeat</strong> — until the goal is met, then answer.</li>
           </ol>
-          <p>This think–act–observe cycle (often called <strong>ReAct</strong>) is how a coding assistant can read files, run tests, see failures, and fix them — looping until things pass. It\'s chain-of-thought plus the ability to actually <em>do</em> things and see what happens.</p>` },
+          <p>This think–act–observe cycle (<strong>ReAct</strong>) is how a coding assistant reads files, runs tests, sees failures, and fixes them — looping until things pass. Chain-of-thought, plus the ability to actually <em>do</em> things and see what happens.</p>` },
         { t: 'quiz',
           q: 'What makes an agent more capable than a single LLM call, even with the same underlying model?',
           opts: [
