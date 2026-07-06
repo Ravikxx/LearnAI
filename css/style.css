@@ -17,6 +17,7 @@
   --series-7: #e87ba4;  /* magenta */
   --series-8: #eb6834;  /* orange */
   --series-9: #0e97b0;  /* cyan */
+  --series-10: #4f46e5; /* indigo */
   --good: #0ca30c;
   --good-text: #006300;
   --bad: #d03b3b;
@@ -43,6 +44,7 @@
     --series-7: #d55181;
     --series-8: #d95926;
     --series-9: #26bcd4;
+    --series-10: #818cf8;
     --good: #0ca30c;
     --good-text: #0ca30c;
     --shadow: 0 1px 3px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);

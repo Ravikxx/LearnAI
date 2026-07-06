@@ -158,7 +158,7 @@ COURSES.push({
             <li><strong>Bias</strong> — models mirror their data; hiding a column doesn\'t hide the pattern</li>
             <li><strong>Interpretability &amp; dual use</strong> — we can\'t fully read these systems yet, and misuse is a human problem</li>
           </ul>
-          <p>From here, the <strong>Python &amp; PyTorch</strong> track lets you build and train these systems yourself — where every idea you\'ve met becomes code you run.</p>` },
+          <p>Next up: <strong>Putting It All Together</strong> — the advanced capstone that fuses every course so far into how frontier AI is actually built, with the real math behind scaling, training, and alignment.</p>` },
       ],
     },
   ],
