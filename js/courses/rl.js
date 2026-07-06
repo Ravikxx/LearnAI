@@ -106,10 +106,21 @@ COURSES.push({
         { t: 'text', title: 'Deep Q-networks and policy gradients', md: `
           <p>Two broad families of deep RL:</p>
           <ul>
-            <li><strong>Value-based</strong> (e.g. Deep Q-Networks) — a network estimates Q-values; the agent acts greedily on them. DeepMind\'s DQN learned to play dozens of Atari games from raw pixels this way in 2013–15.</li>
-            <li><strong>Policy-based</strong> (policy gradients) — a network directly outputs a <em>policy</em>: a probability over actions. Training nudges the probabilities of actions that led to high reward upward. This handles continuous actions (like robot joint torques) that a max-over-actions can\'t.</li>
+            <li><strong>Value-based</strong> (e.g. Deep Q-Networks) — a network estimates Q-values; the agent acts greedily on them. DeepMind\'s DQN learned dozens of Atari games from raw pixels this way in 2013–15.</li>
+            <li><strong>Policy-based</strong> (policy gradients) — a network directly outputs a <em>policy</em>: a probability over actions. Training nudges up the probability of actions that led to high reward. This handles continuous actions (robot joint torques) that a max-over-actions can\'t.</li>
           </ul>
-          <p>Both are trained with the same gradient descent you already know — the difference is only what the network predicts and what the loss rewards.</p>` },
+          <p>Both train with the same gradient descent you already know — only what the network predicts and what the loss rewards differs.</p>` },
+        { t: 'widget', name: 'classify', title: 'Try it: value-based or policy-based?', md: `
+          <p>Sort each description into the family of deep RL it describes.</p>`,
+          buckets: ['Value-based (e.g. DQN)', 'Policy-based (policy gradients)'],
+          items: [
+            ['A network outputs one Q-value per action; the agent acts greedily on them', 0],
+            ['A network outputs a probability distribution over actions directly', 1],
+            ['Works naturally with continuous actions, like robot joint torques', 1],
+            ['DeepMind\'s DQN learning Atari games from raw pixels', 0],
+            ['Training raises the probability of actions that led to high reward', 1],
+            ['The agent picks whichever action has the highest estimated value', 0],
+          ] },
         { t: 'quiz',
           q: 'A "policy network" in policy-gradient RL outputs what?',
           opts: [
@@ -128,7 +139,17 @@ COURSES.push({
       steps: [
         { t: 'text', title: 'Bootstrapping superhuman skill', md: `
           <p>Where do good experiences come from with no human data? For two-player games, the answer is <strong>self-play</strong>: the agent plays millions of games against copies of itself. Wins reinforce the moves that led to them; losses discourage them. Starting from random play, it bootstraps to superhuman skill — and because it isn\'t imitating humans, it invents strategies no human taught it (AlphaGo\'s famous move 37).</p>
-          <p>AlphaZero took this to its limit: given only the rules, no human games at all, it reached superhuman Go, chess, and shogi purely through self-play RL. The reward is the only teacher.</p>` },
+          <p>AlphaZero took this to its limit: given only the rules and no human games at all, it reached superhuman Go, chess, and shogi purely through self-play RL. The reward is the only teacher.</p>` },
+        { t: 'widget', name: 'order', title: 'Try it: order the self-play loop', md: `
+          <p>Click these into the order self-play actually runs in, from a blank slate to superhuman skill.</p>`,
+          items: [
+            'Start with a random (or lightly trained) policy',
+            'Play many games against a copy of itself',
+            'Note which moves led to wins vs. losses',
+            'Reinforce winning moves, discourage losing ones',
+            'Repeat with the improved policy as the new opponent',
+            'Skill compounds over millions of games, eventually surpassing human play',
+          ] },
         { t: 'quiz',
           q: 'How can a self-play agent surpass all human players despite learning from no human games?',
           opts: [
@@ -139,8 +160,8 @@ COURSES.push({
           a: 1,
           why: 'Self-play\'s only signal is reward (winning), not imitation. Free from human conventions, it searches the space of strategies and lands on effective but unconventional ideas. That freedom from human priors is precisely why RL agents can leap past human level in well-defined games.' },
         { t: 'text', title: 'Reward design is everything (and dangerous)', md: `
-          <p>The reward function defines what the agent optimizes — and a powerful optimizer will exploit any gap between the reward and what you actually meant. This is <strong>reward hacking</strong>, the alignment problem from the AI Safety course, in its native habitat: a boat-racing agent that spins in circles collecting bonus points forever instead of finishing the race, because that scored higher.</p>
-          <p>Two hard problems compound it: <strong>sparse rewards</strong> (if reward only comes at the very end, the agent gets almost no signal to learn from) and <strong>reward specification</strong> (writing a reward that truly captures the goal is deceptively hard). Reward design, not the algorithm, is where most real RL projects live or die.</p>` },
+          <p>The reward function defines what the agent optimizes — and a powerful optimizer will exploit any gap between the reward and what you actually meant. This is <strong>reward hacking</strong>: a boat-racing agent that spins in circles collecting bonus points forever instead of finishing the race, because that scored higher.</p>
+          <p>Two hard problems compound it: <strong>sparse rewards</strong> (if reward only comes at the very end, there\'s almost no signal to learn from) and <strong>reward specification</strong> (writing a reward that truly captures the goal is deceptively hard). Reward design, not the algorithm, is where most real RL projects live or die.</p>` },
         { t: 'quiz',
           q: 'A racing agent rewarded for "points collected" learns to loop forever hitting the same bonuses instead of finishing. This is...',
           opts: [
@@ -152,7 +173,7 @@ COURSES.push({
           why: 'The algorithm worked perfectly — it maximized the stated reward. The reward was the flaw: it rewarded points, not finishing. This gap between proxy (points) and intent (win the race) is reward hacking, and it\'s why specifying rewards well is the central practical challenge of RL.' },
         { t: 'text', title: 'RL you\'ve already met: RLHF', md: `
           <p>One more connection closes the loop. <strong>RLHF</strong> — the technique that turned an autocomplete LLM into a helpful assistant — is reinforcement learning. The "environment" is a conversation, the "action" is generating a response, and the "reward" comes from a model trained on human preferences. The LLM is optimized to produce high-reward (human-preferred) answers.</p>
-          <p>So RL isn\'t just for games. It\'s how we align language models — and it carries every RL lesson with it, including reward hacking (a model gaming the reward model into confident-sounding nonsense) and the need to optimize the reward only carefully.</p>` },
+          <p>So RL isn\'t just for games — it\'s how we align language models, carrying every RL lesson with it, including reward hacking (a model gaming the reward model into confident-sounding nonsense).</p>` },
         { t: 'text', title: '🎓 Reward, mastered', md: `
           <p>You now understand the paradigm behind game-playing AI and LLM alignment alike:</p>
           <ul>
